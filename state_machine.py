@@ -8,7 +8,7 @@ class StateMachine():
     def __init__(self, ticker_freq):
         self.robot_state = State()
         self.sensor_state = SensorState()
-        self.state_functions = StateFunctions()
+        self.state_functions = StateFunctions(self.robot_state, self.sensor_state)
         self.ticker = Ticker(0, ticker_freq, self.run)
 
     def start(self):
