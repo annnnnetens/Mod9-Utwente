@@ -5,4 +5,5 @@ class SensorState:
 
     def update(self):
         # TODO: read sensor values and update them.
+        # TODO: add encoder to this.
         pass

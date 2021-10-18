@@ -22,7 +22,8 @@ class StateFunctions:
         # TODO: start the calibration (entry action)
         # TODO: keep on calibrating
         # TODO: Find a way to know that calibration has stopped
-        # TODO: if done continue to standby
+        # If a signal for lowering the pencil is given than then calibration is done
+        # TODO: if done continue to lowering
         # EMG also needs to be calibrated right? What should be done over there?
         pass
 
