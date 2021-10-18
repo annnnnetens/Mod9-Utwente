@@ -29,19 +29,35 @@ class StateFunctions:
     def standby(self):
         # TODO: state action should be to send 0 signals to the motors
         # TODO: add state guards that listens for the EMG signals (if it exceeds certain values then go to corresponding state)
+        self.listen_for_signal()
         pass
 
     def lifting(self):
         # TODO: Entry action = stop the rotating motors
         # TODO: state action = send full power to servo motor
+        self.listen_for_signal()
         pass
 
     def lowering(self):
         # TODO: Entry action = stop the rotating motors
         # TODO: state action = send no power to servo motor
+        self.listen_for_signal()
         pass
 
     def moving(self):
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
+        self.listen_for_signal()
+        pass
+
+    def listen_for_signal(self):
+        """
+        It seems that in the states standby, lifting, lowering and moving you can move to any of the other states.
+        Moreover it needs the same state guards for that.
+        So why implement 4 times the same code when it also fits nicely in one function.
+        Functionality: reads EMG signal (from the SensorState class).
+        If it signals that the pen should be lifted/lowered go to the corresponding state
+        If (use elif) the signal says the arm needs to move then change the state to moving
+        If no signal then set the state to standby
+        """
         pass
