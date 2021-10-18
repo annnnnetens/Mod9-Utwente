@@ -4,7 +4,8 @@ from states import State
 from sensor import SensorState
 from state_functions import StateFunctions
 
-class StateMachine():
+
+class StateMachine:
     def __init__(self, ticker_freq):
         self.robot_state = State()
         self.sensor_state = SensorState()

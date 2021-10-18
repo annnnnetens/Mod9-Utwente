@@ -1,4 +1,4 @@
-class State():
+class State:
     CALIBRATING = 'calibrating'
     STAND_BY = 'standby'
     LIFTING = 'lifting'

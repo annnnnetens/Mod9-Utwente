@@ -1,4 +1,4 @@
-class SensorState():
+class SensorState:
     def __init__(self):
         return
 
