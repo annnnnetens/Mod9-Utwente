@@ -1,6 +1,8 @@
 class SensorState:
     def __init__(self):
-        return
+        # TODO: what sensors are available to us?
+        pass
 
     def update(self):
+        # TODO: read sensor values and update them.
         pass
