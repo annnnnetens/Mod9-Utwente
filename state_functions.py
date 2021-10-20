@@ -61,4 +61,16 @@ class StateFunctions:
         If (use elif) the signal says the arm needs to move then change the state to moving
         If no signal then set the state to standby
         """
-        pass
+        EMG_signal_1 = self.sensor_state.EMG_biceps
+        EMG_signal_2 = self.sensor_state.EMG_triceps
+        # Just using stub values here. Feel free to change
+        if EMG_signal_1 > 0.3:
+            # Read a clear lifting signal
+            self.robot_state.set(State.LIFTING)
+        elif EMG_signal_1 < -0.3:
+            # Read a clear lifting signal
+            self.robot_state.set(State.LOWERING)
+        elif EMG_signal_2 > 0.5:
+            self.robot_state.set(State.MOVING)
+        else:
+            self.robot_state.set(State.STAND_BY)
