@@ -7,7 +7,8 @@ class State:
 
     def __init__(self):
         self.previous = None
-        self.current = self
+        # TODO: change to CALIBRATING
+        self.current = self.STAND_BY
 
     def set(self, state):
         self.previous = self.current

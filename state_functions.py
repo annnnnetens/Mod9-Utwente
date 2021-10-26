@@ -37,6 +37,7 @@ class StateFunctions:
         # TODO: state action should be to send 0 signals to the motors
         # TODO: add state guards that listens for the EMG signals (if it exceeds certain values then go to corresponding state)
         self.write_servo_motor()
+        print("standing by")
         self.listen_for_signal()
         pass
 
@@ -60,7 +61,7 @@ class StateFunctions:
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
         EMG_signal = self.sensor_state.EMG_triceps
-
+        print("writing " + str(EMG_signal) + " to motors")
         self.motor_joint_base.write(EMG_signal)
         self.motor_joint_arm.write(EMG_signal)
 
@@ -80,17 +81,26 @@ class StateFunctions:
         """
         EMG_signal_1 = self.sensor_state.EMG_biceps
         EMG_signal_2 = self.sensor_state.EMG_triceps
+        print("signals are resp. " + str(EMG_signal_1) + " and " + str(EMG_signal_2))
         # Just using stub values here. Feel free to change
         if EMG_signal_1 > 0.3:
             # Read a clear lifting signal
             self.robot_state.set(State.LIFTING)
+            if self.robot_state.is_changed():
+                print("going to lifting")
         elif EMG_signal_1 < -0.3:
             # Read a clear lifting signal
             self.robot_state.set(State.LOWERING)
+            if self.robot_state.is_changed():
+                print("going to lowering")
         elif abs(EMG_signal_2) > 0.5:
             self.robot_state.set(State.MOVING)
+            if self.robot_state.is_changed():
+                print("going to moving")
         else:
             self.robot_state.set(State.STAND_BY)
+            if self.robot_state.is_changed():
+                print("going to standby")
 
     def write_servo_motor(self):
         self.servo_motor.value(self.servo_motor_value)
