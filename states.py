@@ -1,8 +1,7 @@
 class State:
     CALIBRATING = 'calibrating'
     STAND_BY = 'standby'
-    LIFTING = 'lifting'
-    LOWERING = 'lowering'
+    TOGGLING = 'toggling'
     MOVING = 'moving'
 
     def __init__(self):

@@ -14,8 +14,7 @@ class StateFunctions:
         self.callbacks = {
             State.CALIBRATING: self.calibrating,
             State.STAND_BY: self.standby,
-            State.LIFTING: self.lifting,
-            State.LOWERING: self.lowering,
+            State.TOGGLING: self.toggling,
             State.MOVING: self.moving
         }
         self.motor_joint_base = Motor(Pins.MOTOR_1_DIRECTION, Pins.MOTOR_1_PWN, ticker_frequency)
@@ -34,9 +33,6 @@ class StateFunctions:
         pass
 
     def standby(self):
-        # TODO: state action should be to send 0 signals to the motors
-        # TODO: add state guards that listens for the EMG signals (if it exceeds certain values then go to corresponding state)
-
         print("standing by")
 
         self.stop_motor()
@@ -44,19 +40,9 @@ class StateFunctions:
         self.listen_for_signal()
         pass
 
-    def lifting(self):
-        # TODO: Entry action = stop the rotating motors
-        # TODO: state action = send full power to servo motor
-        self.servo_motor_value = 1
-
-        self.stop_motor()
-        self.write_servo_motor()
-        self.listen_for_signal()
-
-    def lowering(self):
-        # TODO: Entry action = stop the rotating motors
-        # TODO: state action = send no power to servo motor
-        self.servo_motor_value = 0
+    def toggling(self):
+        self.servo_motor_value = not self.servo_motor_value
+        print("servo motor is now " + str(self.servo_motor_value))
 
         self.stop_motor()
         self.write_servo_motor()
@@ -66,9 +52,10 @@ class StateFunctions:
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
         EMG_signal = self.sensor_state.EMG_triceps
-        print("writing " + str(EMG_signal) + " to motors")
-        self.motor_joint_base.write(EMG_signal)
-        self.motor_joint_arm.write(EMG_signal)
+        transformed_signal = (EMG_signal - 0.5) * 2
+        print("writing " + str(transformed_signal) + " to motors")
+        self.motor_joint_base.write(transformed_signal)
+        self.motor_joint_arm.write(transformed_signal)
 
         self.write_servo_motor()
         self.listen_for_signal()
@@ -83,21 +70,14 @@ class StateFunctions:
         If (use elif) the signal says the arm needs to move then change the state to moving
         If no signal then set the state to standby
         """
+
+        switch_val = self.sensor_state.switch_value
         EMG_signal_1 = self.sensor_state.EMG_biceps
-        EMG_signal_2 = self.sensor_state.EMG_triceps
-        print("signals are resp. " + str(EMG_signal_1) + " and " + str(EMG_signal_2))
+        print("signal is " + str(EMG_signal_1) + " and blueswitch is " + switch_val)
         # Just using stub values here. Feel free to change
-        if EMG_signal_1 > 0.3:
-            # Read a clear lifting signal
-            self.robot_state.set(State.LIFTING)
-            if self.robot_state.is_changed():
-                print("going to lifting")
-        elif EMG_signal_1 < -0.3:
-            # Read a clear lifting signal
-            self.robot_state.set(State.LOWERING)
-            if self.robot_state.is_changed():
-                print("going to lowering")
-        elif abs(EMG_signal_2) > 0.5:
+        if switch_val == 1 and self.robot_state.current != State.TOGGLING:
+            self.robot_state.set(State.TOGGLING)
+        elif EMG_signal_1 > 0.75 or EMG_signal_1 < 0.25:
             self.robot_state.set(State.MOVING)
             if self.robot_state.is_changed():
                 print("going to moving")
