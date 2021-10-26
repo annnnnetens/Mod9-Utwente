@@ -72,8 +72,8 @@ class StateFunctions:
         """
 
         switch_val = self.sensor_state.switch_value
-        EMG_signal_1 = self.sensor_state.EMG_biceps
-        print("signal is " + str(EMG_signal_1) + " and blueswitch is " + switch_val)
+        EMG_signal_1 = self.sensor_state.EMG_triceps
+        print("signal is " + str(EMG_signal_1) + " and blueswitch is " + str(switch_val))
         # Just using stub values here. Feel free to change
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
