@@ -36,8 +36,11 @@ class StateFunctions:
     def standby(self):
         # TODO: state action should be to send 0 signals to the motors
         # TODO: add state guards that listens for the EMG signals (if it exceeds certain values then go to corresponding state)
-        self.write_servo_motor()
+
         print("standing by")
+
+        self.stop_motor()
+        self.write_servo_motor()
         self.listen_for_signal()
         pass
 
@@ -45,17 +48,19 @@ class StateFunctions:
         # TODO: Entry action = stop the rotating motors
         # TODO: state action = send full power to servo motor
         self.servo_motor_value = 1
+
+        self.stop_motor()
         self.write_servo_motor()
         self.listen_for_signal()
-        pass
 
     def lowering(self):
         # TODO: Entry action = stop the rotating motors
         # TODO: state action = send no power to servo motor
         self.servo_motor_value = 0
+
+        self.stop_motor()
         self.write_servo_motor()
         self.listen_for_signal()
-        pass
 
     def moving(self):
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
@@ -67,7 +72,6 @@ class StateFunctions:
 
         self.write_servo_motor()
         self.listen_for_signal()
-        pass
 
     def listen_for_signal(self):
         """
@@ -104,3 +108,7 @@ class StateFunctions:
 
     def write_servo_motor(self):
         self.servo_motor.value(self.servo_motor_value)
+
+    def stop_motor(self):
+        self.motor_joint_arm.write(0)
+        self.motor_joint_base.write(0)
