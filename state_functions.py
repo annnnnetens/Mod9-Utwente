@@ -3,6 +3,7 @@ from motor import Motor
 from pins import Pins
 import machine
 
+
 # The statefunctions class can be extended by having the servo motor hold in a certain position.
 # This position needs to be visible in all states (use a self. variable)
 # and needs to be send to the servo motor at all states (except calibrating).
@@ -34,7 +35,6 @@ class StateFunctions:
         elif switch_val:
             print("\nCalibration done! Have fun with drawing\n")
             self.robot_state.set(State.STAND_BY)
-
 
     def standby(self):
         print("standing by")

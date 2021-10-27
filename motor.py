@@ -1,6 +1,7 @@
 from biorobotics import PWM
 from machine import Pin
 
+
 class Motor:
     def __init__(self, motordir, motorpwm, frequency):
         self.pwm_dir = Pin(motordir, Pin.OUT)

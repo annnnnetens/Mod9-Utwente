@@ -3,7 +3,7 @@
 # Two motors and one servo
 # EMG pins
 # Potmeter
-class Pins():
+class Pins:
     MOTOR_1_DIRECTION = 'D4'
     MOTOR_1_PWN = 'D5'
     MOTOR_2_DIRECTION = 'D7'
