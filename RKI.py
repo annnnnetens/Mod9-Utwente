@@ -1,4 +1,5 @@
 import math
+# When working on the microcontroller change the numpy to ulab since numpy is not available on the microcontroller
 import numpy as np
 
 
