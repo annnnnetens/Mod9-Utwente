@@ -1,15 +1,22 @@
 import pyb
+import micropython
+import biorobotics
 
-# TODO: implement catching the button bounce (using tic and toc)
+
 class BlueSwitch:
     def __init__(self):
         self.switch_value = 0
         self.switch = pyb.Switch()
         self.switch.callback(self.callback)
+        biorobotics.tic()
 
     def callback(self):
-        self.switch_value = 1
-        return
+        micropython.heap_unlock()
+        elapsed = biorobotics.toc()
+        micropython.heap_lock()
+        if elapsed > 250000:
+            self.switch_value = 1
+            biorobotics.tic()
 
     def value(self):
         res = self.switch_value
