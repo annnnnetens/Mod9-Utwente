@@ -24,13 +24,17 @@ class StateFunctions:
         return
 
     def calibrating(self):
-        # TODO: start the calibration (entry action)
-        # TODO: keep on calibrating
-        # TODO: Find a way to know that calibration has stopped
-        # If a signal for lowering the pencil is given than then calibration is done
-        # TODO: if done continue to lowering
-        # EMG also needs to be calibrated right? What should be done over there?
-        pass
+        # TODO: EMG also needs to be calibrated. Needs to be hardcoded (although if you do it in this state it would be fun :))
+        switch_val = self.sensor_state.switch_value
+        if self.robot_state.is_changed():
+            print("Starting calibration")
+            print("Please move the arm untill it is completely stretched")
+            print("If you are done press the blue button")
+            self.robot_state.set(self.robot_state.current)
+        elif switch_val:
+            print("\nCalibration done! Have fun with drawing\n")
+            self.robot_state.set(State.STAND_BY)
+
 
     def standby(self):
         print("standing by")
@@ -74,9 +78,10 @@ class StateFunctions:
         switch_val = self.sensor_state.switch_value
         EMG_signal_1 = self.sensor_state.EMG_triceps
         print("signal is " + str(EMG_signal_1) + " and blueswitch is " + str(switch_val))
-        # Just using stub values here. Feel free to change
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
+            print("going to toggling")
+        # Just using stub values here. Feel free to change
         elif EMG_signal_1 > 0.75 or EMG_signal_1 < 0.25:
             self.robot_state.set(State.MOVING)
             if self.robot_state.is_changed():
