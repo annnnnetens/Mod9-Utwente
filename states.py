@@ -6,7 +6,6 @@ class State:
 
     def __init__(self):
         self.previous = None
-        # TODO: change to CALIBRATING
         self.current = self.CALIBRATING
 
     def set(self, state):

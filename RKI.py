@@ -51,7 +51,7 @@ def get_position_from_h_matrix(h_matrix):
     return h_matrix[0, 2], h_matrix[1, 2]
 
 
-def brockett(h0_matrix, twistspairs, degrees=True):
+def brockett(h0_matrix, *twistspairs, degrees=True):
     """
     Creates H matrix using brockett
     Inputs: H0_matrix is the H matrix in the reference configuration
@@ -107,8 +107,19 @@ def tilde_to_twist(tilde):
     return np.array([tilde[1, 0], tilde[0, 2], tilde[1, 2]])
 
 
-def jacobian(twists):
+def jacobian_twists(*twists):
+    """Calculate jacobian using the twists"""
     return np.array(twists).T
+
+
+def jacobian_angles(q1):
+    """Calculate jacobian using the angles
+    Keep in mind that it only needs q1 and the length of the first part is assumed to be 240mm
+    Currently only uses radians"""
+    J = np.zeros((3, 2))
+    J[:, 0] = (1, 0, 0)
+    J[:, 1] = (1, 0.24 * np.cos(q1*np.pi), 0.24 * np.sin(q1*np.pi))
+    return J
 
 
 def unit_twist_tranlational(vx, vy):
@@ -116,11 +127,11 @@ def unit_twist_tranlational(vx, vy):
     if magnitude == 1:
         return np.array([0, vx, vy])
     else:
-        return np.array([0, vx / magnitude, vy / magnitude])
+        return np.array([0, vx / magnitude, vy / magnitude]).T
 
 
 def unit_twist_rotational(px, py):
-    return np.array([1, py, -px])
+    return np.array([1, py, -px]).T
 
 
 if __name__ == "__main__":
@@ -146,10 +157,10 @@ if __name__ == "__main__":
         [0, 1, 3],
         [0, 0, 1]
     ])
-    T1 = np.array([1, 0, 0])
-    T2 = np.array([0, 0, 1])
-    T3 = np.array([2, 0, 0])
-    T4 = np.array([0, 1, 1])
+    T1 = np.array([1, 0, 0]).T
+    T2 = np.array([0, 0, 1]).T
+    T3 = np.array([2, 0, 0]).T
+    T4 = np.array([0, 1, 1]).T
 
     print(h_to_adjoint(identity))
     print(h_to_adjoint(H1))
@@ -168,3 +179,4 @@ if __name__ == "__main__":
         brockett(H4, [(T1, 45), (T4, 0)])
     except ValueError:
         print("caught correct valueerror")
+    print(jacobian_twists(unit_twist_rotational(0,0), unit_twist_tranlational(2,1)))
