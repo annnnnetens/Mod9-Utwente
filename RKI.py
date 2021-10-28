@@ -134,6 +134,31 @@ def unit_twist_rotational(px, py):
     return np.array([1, py, -px]).T
 
 
+def calculate_dq(q1, q2, x_desired, y_desired):
+    L3 = 0.015
+    reference_configuration = np.array([
+        [1, 0, L3],
+        [0, 1, 0.425],
+        [0, 0, 1]
+    ])
+    reference_twist1 = unit_twist_rotational(0, 0)
+    reference_twist2 = unit_twist_rotational(0, 0.24)
+    He0 = brockett(reference_configuration, (reference_twist1, q1), (reference_twist2, q2), degrees=True)
+    J = jacobian_angles(q1)
+
+    pe0 = He0[:2, 2]
+    ps = np.array([x_desired, y_desired])  # TODO: insert desired position or velocity?
+    K = 10  # TODO: tune K to have good response
+    F = K * (ps - pe0)
+    # TODO: maybe constrict F like is done in exercise E
+    Ws0 = np.array([pe0[0] * F[1] - pe0[1] * F[0], F[0], F[1]])
+    tau = J.T @ Ws0
+
+    b = [0.5, 0.25]  # TODO: tune b to have good response
+    dq = tau / b
+    return dq
+
+
 if __name__ == "__main__":
     # For testing
     identity = np.eye(3)
@@ -179,4 +204,4 @@ if __name__ == "__main__":
         brockett(H4, [(T1, 45), (T4, 0)])
     except ValueError:
         print("caught correct valueerror")
-    print(jacobian_twists(unit_twist_rotational(0,0), unit_twist_tranlational(2,1)))
+    print(jacobian_twists(unit_twist_rotational(0, 0), unit_twist_tranlational(2, 1)))
