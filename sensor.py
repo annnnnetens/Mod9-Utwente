@@ -53,12 +53,13 @@ class SensorState:
 
 
     def send_to_pc(self):
+        # copied from low end emg practical
         # to use for graphing in uscope, maybe needs a ticker?
         # doubles over the emg.read() with update() but since this is only for debugging, it should be okay
         
-        for i, emg in enumerate(self.emgs):
+        for i, emg in enumerate(self.emgs): 
             self.pc.set(i, emg.read())
-            
+            # TODO: ask about whether emgs = [AnalogIn('A0'), AnalogIn('A1')] takes a single emg two times or two emgs
         
         self.pc.set(2, self.gain_1*self.LP_100_10_1.filter(emg.read()))
         self.pc.send()
