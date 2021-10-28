@@ -1,9 +1,8 @@
-import numpy as np
 from states import State
 from motor import Motor
 from pins import Pins
 import machine
-from RKI import jacobian_angles, unit_twist_rotational, brockett
+from RKI import calculate_dq
 
 
 # The statefunctions class can be extended by having the servo motor hold in a certain position.
@@ -24,6 +23,7 @@ class StateFunctions:
         self.motor_joint_base = Motor(Pins.MOTOR_1_DIRECTION, Pins.MOTOR_1_PWN, ticker_frequency)
         self.motor_joint_arm = Motor(Pins.MOTOR_2_DIRECTION, Pins.MOTOR_2_PWM, ticker_frequency)
         self.servo_motor = machine.Pin(Pins.SERVO_MOTOR, machine.Pin.OUT)
+        self.frequency = ticker_frequency
         self.servo_motor_value = 0
         self.q1 = 0
         self.q2 = 0
@@ -69,8 +69,13 @@ class StateFunctions:
         self.motor_joint_base.write(transformed_signal_1)
         self.motor_joint_arm.write(transformed_signal_1)
         # TODO: need to add position or velocity to the function below instead of 0, 0.4
-        dq = self.calculate_dq(0, 0.4)
+        dq = calculate_dq(self.q1, self.q2, 0, 0.4)
+        conversion_rate = 64*131.25*self.frequency
         # TODO: need to incorparate the dq somewhere in the motors
+        # self.motor_joint_base.write(dq[0]/conversion_rate)
+        # self.motor_joint_arm.write(dq[1]/conversion_rate)
+        # self.q1 += dq[0]/self.frequency
+        # self.q2 += dq[1]/self.frequency
         self.write_servo_motor()
         self.listen_for_signal()
 
@@ -109,26 +114,3 @@ class StateFunctions:
     def stop_motor(self):
         self.motor_joint_arm.write(0)
         self.motor_joint_base.write(0)
-
-    def calculate_dq(self, x_desired, y_desired):
-        reference_configuration = np.array([
-            [1, 0, 0],
-            [0, 1, 0.425],
-            [0, 0, 1]
-        ])
-        reference_twist1 = unit_twist_rotational(0, 0)
-        reference_twist2 = unit_twist_rotational(0, 0.24)
-        He0 = brockett(reference_configuration, (reference_twist1, self.q1), (reference_twist2, self.q2), degrees=True)
-        J = jacobian_angles(self.q1)
-
-        pe0 = He0[:2, 2]
-        ps = np.array([x_desired, y_desired])  # TODO: insert desired position or velocity?
-        K = 10  # TODO: tune K to have good response
-        F = K * (ps - pe0)
-        # TODO: maybe constrict F like is done in exercise E
-        Ws0 = np.array([pe0[0] * F[1] - pe0[1] * F[0], F[0], F[1]])
-        tau = J.T @ Ws0
-
-        b = [0.5, 0.25]  # TODO: tune b to have good response
-        dq = tau / b
-        return dq
