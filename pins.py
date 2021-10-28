@@ -1,5 +1,5 @@
 # TODO: add pin defintions
-# Encoder (one for each motor for sure)
+# Encoder (two for each motor)
 # Two motors and one servo
 # EMG pins
 # Potmeter
@@ -11,3 +11,8 @@ class Pins:
     POTMETER_1 = 'A5'
     POTMETER_2 = 'A4'
     SERVO_MOTOR = 'D2'
+
+    SERIAL_PC = 3 # only for graphing the EMG, not needed in the end
+    EMG_1 = 'A0'
+    EMG_2 = 'A1'
+

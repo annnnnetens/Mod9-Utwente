@@ -1,0 +1,14 @@
+first boot.py and main.py are called: main creates a state_machine robot
+state_machine uses sensor_state and states (robot state) with state_functions(state, sensor_state) to run the robot and use callbacks.
+
+state_functions are the robot states defined as in state diagram - moving, toggling, standby, etc.
+they depend on sensor_state to read EMGs and switch value (TODO: and encoder), and writes the PWM to motors.
+
+states define what states are in general, creates the actual object, while state_functions more define what the states do
+
+motor.py just defines motor pins and what pwm does.
+
+pins.py just define pins.
+
+sensor.py takes the inputs such as Encoder, potmeters and blueswitch.
+
