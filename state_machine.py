@@ -25,6 +25,7 @@ class StateMachine:
     def run(self):
         self.sensor_state.update() # TODO: add False to measure EMGs and not potmeters
         self.state_functions.callbacks[self.robot_state.current]()
+        # can use self.sensor_state.send_to_pc()
 
     def stop(self):
         self.ticker.stop()

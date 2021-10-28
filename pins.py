@@ -8,8 +8,11 @@ class Pins:
     MOTOR_1_PWN = 'D5'
     MOTOR_2_DIRECTION = 'D7'
     MOTOR_2_PWM = 'D6'
-    POTMETER_1 = 'A5'
-    POTMETER_2 = 'A4'
+
+    POTMETER_1_A = 'A5'
+    POTMETER_1_B = 'A4'
+    POTMETER_2_A = 'A3'
+    POTMETER_2_B = 'A2'
     SERVO_MOTOR = 'D2'
 
     SERIAL_PC = 3 # only for graphing the EMG, not needed in the end
