@@ -3,7 +3,6 @@ from biorobotics import Ticker
 from states import State
 from sensor import SensorState
 from state_functions import StateFunctions
-from emg_reading import EMG_read
 
 
 class StateMachine:
@@ -19,13 +18,12 @@ class StateMachine:
         self.sensor_state = SensorState(listlowpass, gainlowpass, listbandstop, gainbandstop)
         self.state_functions = StateFunctions(self.robot_state, self.sensor_state, ticker_freq)
         self.ticker = Ticker(0, ticker_freq, self.run)
-        # self.emgs = EMG_read(list_bw_lowpass, gain_bw_lowpass, list_bw_bandstop, gain_bw_bandstop)
 
     def start(self):
         self.ticker.start()
 
     def run(self):
-        self.sensor_state.update()
+        self.sensor_state.update() # TODO: add False to measure EMGs and not potmeters
         self.state_functions.callbacks[self.robot_state.current]()
 
     def stop(self):
