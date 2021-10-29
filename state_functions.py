@@ -1,7 +1,7 @@
 from states import State
 from motor import Motor
 from pins import Pins
-import machine
+from biorobotics import PWM
 # from RKI import calculate_dq
 
 
@@ -22,9 +22,9 @@ class StateFunctions:
         }
         self.motor_joint_base = Motor(Pins.MOTOR_1_DIRECTION, Pins.MOTOR_1_PWN, ticker_frequency)
         self.motor_joint_arm = Motor(Pins.MOTOR_2_DIRECTION, Pins.MOTOR_2_PWM, ticker_frequency)
-        self.servo_motor = machine.Pin(Pins.SERVO_MOTOR, machine.Pin.OUT)
+        self.servo_motor = PWM(Pins.SERVO_MOTOR, ticker_frequency)
         self.frequency = ticker_frequency
-        self.servo_motor_value = 0
+        self.servo_motor_value = 1
         self.q1 = 0
         self.q2 = 0
         return
@@ -50,7 +50,7 @@ class StateFunctions:
         pass
 
     def toggling(self):
-        self.servo_motor_value = not self.servo_motor_value
+        self.servo_motor_value =  -self.servo_motor_value
         print("servo motor is now " + str(self.servo_motor_value))
 
         self.stop_motor()
@@ -63,8 +63,8 @@ class StateFunctions:
         EMG_signal_1 = self.sensor_state.emg1_value
         EMG_signal_2 = self.sensor_state.emg2_value
         # Transformed signal
-        transformed_signal_1 = (EMG_signal_1 - 0.5) * 2
-        transformed_signal_2 = (EMG_signal_2 - 0.5) * 2
+        transformed_signal_1 = (EMG_signal_1 - 0.5)
+        transformed_signal_2 = (EMG_signal_2 - 0.5) / 5
 
         # TODO: add checks for joints to not exceed physical boundaries
         if (self.q1 >= 0.5 and transformed_signal_1 > 0) or (self.q1 <= -0.5 and transformed_signal_1 < 0):
@@ -73,9 +73,10 @@ class StateFunctions:
         if (self.q2 >= 7/18 and transformed_signal_2 > 0) or (self.q2 <= -7/18 and transformed_signal_2 < 0):
             transformed_signal_2 = 0
             print("Joint 2 has reached it's bounds. Stopping the motor")
-        print("writing " + str(transformed_signal_1) + " to motors")
+        print("Encoder value of base is " + str(self.sensor_state.motor1_sensor))
+        print("writing " + str(transformed_signal_1) + " and " + str(transformed_signal_2) +  " to motors")
         self.motor_joint_base.write(transformed_signal_1)
-        self.motor_joint_arm.write(transformed_signal_1)
+        self.motor_joint_arm.write(transformed_signal_2)
         # TODO: need to add position or velocity to the function below instead of 0, 0.4
         # dq = calculate_dq(self.q1, self.q2, 0, 0.4)
         conversion_rate = 64*131.25*self.frequency
@@ -103,7 +104,7 @@ class StateFunctions:
         EMG_signal_1 = self.sensor_state.emg1_value
         EMG_signal_2 = self.sensor_state.emg2_value
 
-        print("signal 1 is " + str(EMG_signal_1) + "signal 2 is " + str(EMG_signal_2) + " and blueswitch is " + str(switch_val))
+        # print("signal 1 is " + str(EMG_signal_1) + "signal 2 is " + str(EMG_signal_2) + " and blueswitch is " + str(switch_val))
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
             print("going to toggling")
@@ -118,7 +119,7 @@ class StateFunctions:
                 print("going to standby")
 
     def write_servo_motor(self):
-        self.servo_motor.value(self.servo_motor_value)
+        self.servo_motor.write(self.servo_motor_value)
 
     def stop_motor(self):
         self.motor_joint_arm.write(0)
