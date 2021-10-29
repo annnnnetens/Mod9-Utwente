@@ -1,4 +1,4 @@
-from biorobotics import AnalogIn, SerialPC
+from biorobotics import AnalogIn, SerialPC, Encoder
 from pins import Pins
 from BlueSwitch import BlueSwitch
 from biquad_filter import Biquad
@@ -14,8 +14,8 @@ class SensorState:
         self.switch_value = 0
         
         # define encoders for motors 1 and 2
-        self.pins_encoder_1 = AnalogIn(Pins.POTMETER_1_A, Pins.POTMETER_1_B)
-        self.pins_encoder_2 = AnalogIn(Pins.POTMETER_2_A, Pins.POTMETER_2_B)
+        self.pins_encoder_1 = Encoder(Pins.Encoder_1_A, Pins.Encoder_1_B)
+        self.pins_encoder_2 = Encoder(Pins.Encoder_2_A, Pins.Encoder_2_B)
 
         # for filtering the EMG
         self.LP_100_10_1 = Biquad(listlowpass)
@@ -36,8 +36,8 @@ class SensorState:
     def update(self, USE_POTMETERS=True):
         
         self.switch_value = self.blueswitch.value()
-        self.pins_encoder_1 = self.pins_encoder_1.counter()
-        self.pins_encoder_2 = self.pins_encoder_2.counter()
+        self.motor1_sensor = self.pins_encoder_1.counter()
+        self.motor2_sensor = self.pins_encoder_2.counter()
 
             # TODO: read sensor values and update them.
             # TODO: add encoder to this.

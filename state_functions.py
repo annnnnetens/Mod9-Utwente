@@ -60,8 +60,8 @@ class StateFunctions:
     def moving(self):
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
-        EMG_signal_1 = self.sensor_state.EMG_biceps
-        EMG_signal_2 = self.sensor_state.EMG_triceps
+        EMG_signal_1 = self.sensor_state.emg1_value
+        EMG_signal_2 = self.sensor_state.emg2_value
         # Transformed signal
         transformed_signal_1 = (EMG_signal_1 - 0.5) * 2
         transformed_signal_2 = (EMG_signal_2 - 0.5) * 2
@@ -103,12 +103,12 @@ class StateFunctions:
         EMG_signal_1 = self.sensor_state.emg1_value
         EMG_signal_2 = self.sensor_state.emg2_value
 
-        print("signal is " + str(EMG_signal_1) + " and blueswitch is " + str(switch_val))
+        print("signal 1 is " + str(EMG_signal_1) + "signal 2 is " + str(EMG_signal_2) + " and blueswitch is " + str(switch_val))
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
             print("going to toggling")
         # Just using stub values here. Feel free to change
-        elif EMG_signal_1 > 0.75 or EMG_signal_1 < 0.25 or EMG_signal_2 > 0.75 or EMG_signal_2:
+        elif EMG_signal_1 > 0.75 or EMG_signal_1 < 0.25 or EMG_signal_2 > 0.75 or EMG_signal_2 < 0.25:
             self.robot_state.set(State.MOVING)
             if self.robot_state.is_changed():
                 print("going to moving")
