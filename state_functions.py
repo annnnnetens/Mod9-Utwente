@@ -93,8 +93,8 @@ class StateFunctions:
         """
 
         switch_val = self.sensor_state.switch_value
-        EMG_signal_1 = self.sensor_state.EMG_biceps
-        EMG_signal_2 = self.sensor_state.EMG_triceps
+        EMG_signal_1 = self.sensor_state.emg1_value
+        EMG_signal_2 = self.sensor_state.emg2_value
 
         print("signal is " + str(EMG_signal_1) + " and blueswitch is " + str(switch_val))
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
