@@ -14,8 +14,8 @@ class SensorState:
         self.switch_value = 0
         
         # define encoders for motors 1 and 2
-        self.pins_encoder_1 = AnalogIn(Pins.POTMETER_1_A, Pins.POTMETER_1_B)
-        self.pins_encoder_2 = AnalogIn(Pins.POTMETER_2_A, Pins.POTMETER_2_B)
+        self.pins_encoder_1 = AnalogIn(Pins.ENCODER_1_A, Pins.ENCODER_1_B)
+        self.pins_encoder_2 = AnalogIn(Pins.ENCODER_2_A, Pins.ENCODER_2_B)
 
         # for filtering the EMG
         self.LP_100_10_1 = Biquad(listlowpass)
