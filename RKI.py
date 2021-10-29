@@ -75,8 +75,6 @@ def brockett(h0_matrix, twistspairs):
             y = twist[1]
             current_matrix[0, 2] = x - x * c + y * s
             current_matrix[1, 2] = y - x * s - y * c
-            print('current matrix')
-            print(current_matrix)
             res = res @ current_matrix
         else:
             raise ValueError("There is a non unit twist in brockett")
@@ -172,9 +170,10 @@ def calculate_dq_j_inv(q1, q2, vx, vy):
     J = jacobian_angles(q1)
 
     pe0 = He0[:2, 2]
-    H_0_f = np.array([[1, 0, pe0[0]],
-            [0, 1, pe0[1]],
-            [0, 0, 1]])
+
+    H_0_f = np.array([[1, 0, -pe0[0]],
+                    [0, 1, -pe0[1]],
+                    [0, 0, 1]])
 
     adj_0_f = h_to_adjoint(H_0_f)
 
@@ -201,12 +200,28 @@ if __name__ == "__main__":
     T2 = np.array([1, 0.24, 0]).T
 
     plt.figure()
+    
     angle1 = 0.25
     angle2 = 0.3
+    timestep = 0.01
+    vx = -1
+    vy = 0
+
     H5 = brockett(H4, [(T1, angle1), (T2, angle2)])
     print(H5)
     x = [0, -0.24 * np.sin(angle1 * np.pi), -0.185 * np.sin((angle1 + angle2) * np.pi) - 0.24 * np.sin(angle1 * np.pi)]
     y = [0, 0.24 * np.cos(angle1 * np.pi), 0.185 * np.cos((angle1 + angle2) * np.pi) + 0.24 * np.cos(angle1 * np.pi)]
     plt.plot(x, y, 'r+', markersize = 10)
-    plt.plot(H5[0, 2], H5[1, 2], 'bo')
+
+    [dq1, dq2] = calculate_dq_j_inv(angle1, angle2, vx, vy)
+    a1_i = angle1 + timestep * dq1
+    a2_i = angle2 + timestep * dq2    
+
+    xx = [0, -0.24 * np.sin(a1_i * np.pi), -0.185 * np.sin((a1_i + a2_i) * np.pi) - 0.24 * np.sin(a1_i * np.pi)]
+    yy = [0, 0.24 * np.cos(a1_i * np.pi), 0.185 * np.cos((a1_i + a2_i) * np.pi) + 0.24 * np.cos(a1_i * np.pi)]
+
+    plt.plot(xx, yy, 'bo')
     plt.show()
+
+
+    
