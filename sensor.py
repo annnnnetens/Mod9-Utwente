@@ -36,8 +36,8 @@ class SensorState:
     def update(self, USE_POTMETERS=True):
         
         self.switch_value = self.blueswitch.value()
-        self.pins_encoder_1 = self.pins_encoder_1.counter()
-        self.pins_encoder_2 = self.pins_encoder_2.counter()
+        self.motor1_sensor = self.pins_encoder_1.counter()
+        self.motor2_sensor = self.pins_encoder_2.counter()
 
             # TODO: read sensor values and update them.
             # TODO: add encoder to this.
