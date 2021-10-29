@@ -66,6 +66,7 @@ class StateFunctions:
         transformed_signal_1 = (EMG_signal_1 - 0.5) * 2
         transformed_signal_2 = (EMG_signal_2 - 0.5) * 2
         print("writing " + str(transformed_signal_1) + " to motors")
+        # TODO: add checks for joints to not exceed physical boundaries
         self.motor_joint_base.write(transformed_signal_1)
         self.motor_joint_arm.write(transformed_signal_1)
         # TODO: need to add position or velocity to the function below instead of 0, 0.4
