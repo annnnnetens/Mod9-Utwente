@@ -21,37 +21,27 @@ def adjoint_to_h(adjoint):
     return res
 
 
-def create_h_matrix(angle, location, degrees=True):
+def create_h_matrix(angle, location):
     """Creates a H Matrix from a to b using the angle a makes with respect to b
     The location parameter is the origin of a expressed in frame b
     At least I think it does this :o
     My RKI imagination is not that good"""
-    if degrees:
-        return np.array([
-            [np.cos(np.radians(angle)), -np.sin(np.radians(angle)), location[0]],
-            [np.sin(np.radians(angle)), np.cos(np.radians(angle)), location[1]],
-            [0, 0, 1]
-        ])
-    else:
-        return np.array([
-            [np.cos(angle * np.pi), -np.sin(angle * np.pi), location[0]],
-            [np.sin(angle * np.pi), np.cos(angle * np.pi), location[1]],
-            [0, 0, 1]
-        ])
+    return np.array([
+        [np.cos(angle * np.pi), -np.sin(angle * np.pi), location[0]],
+        [np.sin(angle * np.pi), np.cos(angle * np.pi), location[1]],
+        [0, 0, 1]
+    ])
 
 
-def get_angle_from_h_matrix(h_matrix, degrees=True):
-    if degrees:
-        return np.arccos(h_matrix[0, 0]) / np.pi * 180
-    else:
-        return np.arccos(h_matrix[0, 0]) / np.pi
+def get_angle_from_h_matrix(h_matrix):
+    return np.arccos(h_matrix[0, 0]) / np.pi
 
 
 def get_position_from_h_matrix(h_matrix):
     return h_matrix[0, 2], h_matrix[1, 2]
 
 
-def brockett(h0_matrix, *twistspairs, degrees=True):
+def brockett(h0_matrix, twistspairs):
     """
     Creates H matrix using brockett
     Inputs: H0_matrix is the H matrix in the reference configuration
@@ -75,12 +65,8 @@ def brockett(h0_matrix, *twistspairs, degrees=True):
             res = res @ current_matrix
         elif twist[0] == 1:
             # Rotational joint
-            if degrees:
-                c = np.cos(np.radians(q))
-                s = np.sin(np.radians(q))
-            else:
-                c = np.cos(q * np.pi)
-                s = np.sin(q * np.pi)
+            c = np.cos(q * np.pi)
+            s = np.sin(q * np.pi)
             current_matrix[0:2, 0:2] = np.array([[c, -s], [s, c]])
             x = twist[2] * -1
             y = twist[1]
@@ -107,7 +93,7 @@ def tilde_to_twist(tilde):
     return np.array([tilde[1, 0], tilde[0, 2], tilde[1, 2]])
 
 
-def jacobian_twists(*twists):
+def jacobian_twists(twists):
     """Calculate jacobian using the twists"""
     return np.array(twists).T
 
@@ -143,7 +129,7 @@ def calculate_dq(q1, q2, x_desired, y_desired):
     ])
     reference_twist1 = unit_twist_rotational(0, 0)
     reference_twist2 = unit_twist_rotational(0, 0.24)
-    He0 = brockett(reference_configuration, (reference_twist1, q1), (reference_twist2, q2), degrees=True)
+    He0 = brockett(reference_configuration, [(reference_twist1, q1), (reference_twist2, q2)])
     J = jacobian_angles(q1)
 
     pe0 = He0[:2, 2]
@@ -194,8 +180,8 @@ if __name__ == "__main__":
     print(adjoint_to_h(h_to_adjoint(H3)))
     print("printing brocketts")
     print(brockett(H4, [(T1, 45), (T2, 0)]))
-    print(brockett(H4, [(T1, 0.25), (T2, 0)], degrees=False))
-    print(brockett(H4, [(T1, 0.25), (T2, math.sqrt(2))], degrees=False))
+    print(brockett(H4, [(T1, 0.25), (T2, 0)]))
+    print(brockett(H4, [(T1, 0.25), (T2, math.sqrt(2))]))
     try:
         brockett(H4, [(T3, 45), (T2, 0)])
     except ValueError:
@@ -204,4 +190,4 @@ if __name__ == "__main__":
         brockett(H4, [(T1, 45), (T4, 0)])
     except ValueError:
         print("caught correct valueerror")
-    print(jacobian_twists(unit_twist_rotational(0, 0), unit_twist_tranlational(2, 1)))
+    print(jacobian_twists([unit_twist_rotational(0, 0), unit_twist_tranlational(2, 1)]))

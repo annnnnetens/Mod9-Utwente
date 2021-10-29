@@ -2,7 +2,7 @@ from states import State
 from motor import Motor
 from pins import Pins
 import machine
-from RKI import calculate_dq
+# from RKI import calculate_dq
 
 
 # The statefunctions class can be extended by having the servo motor hold in a certain position.
@@ -69,13 +69,14 @@ class StateFunctions:
         self.motor_joint_base.write(transformed_signal_1)
         self.motor_joint_arm.write(transformed_signal_1)
         # TODO: need to add position or velocity to the function below instead of 0, 0.4
-        dq = calculate_dq(self.q1, self.q2, 0, 0.4)
+        # dq = calculate_dq(self.q1, self.q2, 0, 0.4)
         conversion_rate = 64*131.25*self.frequency
         # TODO: need to incorparate the dq somewhere in the motors
         # self.motor_joint_base.write(dq[0]/conversion_rate)
         # self.motor_joint_arm.write(dq[1]/conversion_rate)
         # self.q1 += dq[0]/self.frequency
         # self.q2 += dq[1]/self.frequency
+        # print(dq)
         self.write_servo_motor()
         self.listen_for_signal()
 
