@@ -3,7 +3,7 @@ from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
 from biquad_filter import Biquad
-# from RKI import calculate_dq
+# from rki import calculate_dq
 
 
 # The statefunctions class can be extended by having the servo motor hold in a certain position.

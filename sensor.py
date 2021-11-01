@@ -1,6 +1,6 @@
 from biorobotics import AnalogIn, Encoder
 from pins import Pins
-from BlueSwitch import BlueSwitch
+from blueswitch import Blueswitch
 
 
 class SensorState:
@@ -28,7 +28,7 @@ class SensorState:
 
         self.potmeter1 = AnalogIn(Pins.POTMETER_1)
         self.potmeter2 = AnalogIn(Pins.POTMETER_2)
-        self.blueswitch = BlueSwitch()
+        self.blueswitch = Blueswitch()
 
     def update(self, USE_POTMETERS=True):
         
