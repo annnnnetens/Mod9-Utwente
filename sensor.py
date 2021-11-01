@@ -17,11 +17,13 @@ class SensorState:
         self.pins_encoder_1 = Encoder(Pins.Encoder_1_A, Pins.Encoder_1_B)
         self.pins_encoder_2 = Encoder(Pins.Encoder_2_A, Pins.Encoder_2_B)
 
-        # for filtering the EMG
-        self.LP_100_10_1 = Biquad(listlowpass)
-        self.gain_1 = gainlowpass
-        self.LP_100_10_2 = Biquad(listbandstop)
-        self.gain_2 = gainbandstop
+        # # for filtering the EMG
+        # self.lowpassfilt_1 = Biquad(listlowpass)
+        # self.lowpassfilt_2 = Biquad(listlowpass)
+        # self.gain_1 = gainlowpass
+        # self.bandstopfilt_1 = Biquad(listbandstop)
+        # self.bandstopfilt_2 = Biquad(listbandstop)
+        # self.gain_2 = gainbandstop
 
         # need this PC to write to uscope
         self.pc = SerialPC(Pins.SERIAL_PC)
@@ -52,14 +54,14 @@ class SensorState:
             self.emg2_value = self.emg2.read()
 
 
-    def send_to_pc(self):
-        # copied from low end emg practical
-        # to use for graphing in uscope, maybe needs a ticker?
-        # doubles over the emg.read() with update() but since this is only for debugging, it should be okay
+    # def send_to_pc(self):
+    #     # copied from low end emg practical
+    #     # to use for graphing in uscope, maybe needs a ticker?
+    #     # doubles over the emg.read() with update() but since this is only for debugging, it should be okay
         
-        for i, emg in enumerate(self.emgs): 
-            self.pc.set(i, emg.read())
-            # TODO: ask about whether emgs = [AnalogIn('A0'), AnalogIn('A1')] takes a single emg two times or two emgs
+    #     for i, emg in enumerate(self.emgs): 
+    #         self.pc.set(i, emg.read())
+    #         # TODO: ask about whether emgs = [AnalogIn('A0'), AnalogIn('A1')] takes a single emg two times or two emgs
         
-        self.pc.set(2, self.gain_1*self.LP_100_10_1.filter(emg.read()))
-        self.pc.send()
+    #     self.pc.set(2, self.gain_1*self.LP_100_10_1.filter(emg.read()))
+    #     self.pc.send()

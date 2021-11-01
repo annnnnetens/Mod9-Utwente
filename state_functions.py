@@ -2,6 +2,7 @@ from states import State
 from motor import Motor
 from pins import Pins
 from biorobotics import PWM
+from biquad_filter import Biquad
 # from RKI import calculate_dq
 
 
@@ -11,7 +12,7 @@ from biorobotics import PWM
 # Also can be extended by ramping up the speed of the servo motor when lifting/lowering the pencil
 class StateFunctions:
 
-    def __init__(self, robot_state, sensor_state, ticker_frequency):
+    def __init__(self, robot_state, sensor_state, listlowpass, gainlowpass, listbandstop, gainbandstop, use_pm, ticker_frequency):
         self.robot_state = robot_state
         self.sensor_state = sensor_state
         self.callbacks = {
@@ -23,6 +24,17 @@ class StateFunctions:
         self.motor_joint_base = Motor(Pins.MOTOR_1_DIRECTION, Pins.MOTOR_1_PWN, ticker_frequency)
         self.motor_joint_arm = Motor(Pins.MOTOR_2_DIRECTION, Pins.MOTOR_2_PWM, ticker_frequency)
         self.servo_motor = PWM(Pins.SERVO_MOTOR, ticker_frequency)
+        
+        # for filtering the EMG
+        self.lowpassfilt_1 = Biquad(listlowpass)
+        self.lowpassfilt_2 = Biquad(listlowpass)
+        self.gain_1 = gainlowpass
+        self.bandstopfilt_1 = Biquad(listbandstop)
+        self.bandstopfilt_2 = Biquad(listbandstop)
+        self.gain_2 = gainbandstop
+        
+        self.USE_PM = use_pm
+
         self.frequency = ticker_frequency
         self.servo_motor_value = 1
         self.q1 = 0
@@ -60,11 +72,19 @@ class StateFunctions:
     def moving(self):
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
+
         EMG_signal_1 = self.sensor_state.emg1_value
         EMG_signal_2 = self.sensor_state.emg2_value
-        # Transformed signal
-        transformed_signal_1 = (EMG_signal_1 - 0.5)
-        transformed_signal_2 = (EMG_signal_2 - 0.5) / 5
+        
+        if not self.USE_PM:
+            # Transformed signal - low filtered
+            tf_1 = self.gain_1 * self.lowpassfilt_1.filter(EMG_signal_1)
+            tf_2 = self.gain_2 * self.lowpassfilt_2.filter(EMG_signal_2)
+
+            transformed_signal_1 = self.bandstopfilt_1.filter(tf_1)
+            transformed_signal_2 = self.bandstopfilt_2.filter(tf_2)
+
+
 
         # TODO: add checks for joints to not exceed physical boundaries
         if (self.q1 >= 0.5 and transformed_signal_1 > 0) or (self.q1 <= -0.5 and transformed_signal_1 < 0):
