@@ -1,11 +1,13 @@
 from biorobotics import AnalogIn, Encoder
 from pins import Pins
 from blueswitch import Blueswitch
-
+from biquad_filter import Biquad
 
 class SensorState:
-    def __init__(self): #, listlowpass, gainlowpass, listbandstop, gainbandstop):
+    def __init__(self, listlowpass, gainlowpass, listbandstop, gainbandstop):
         self.emg1_value = 0
+        self.emg1_f = 0
+        self.emg2_f = 0
         self.emg2_value = 0
         self.motor1_sensor = 0
         self.motor2_sensor = 0
@@ -15,13 +17,13 @@ class SensorState:
         self.pins_encoder_1 = Encoder(Pins.Encoder_1_A, Pins.Encoder_1_B)
         self.pins_encoder_2 = Encoder(Pins.Encoder_2_A, Pins.Encoder_2_B)
 
-        # # for filtering the EMG
-        # self.lowpassfilt_1 = Biquad(listlowpass)
-        # self.lowpassfilt_2 = Biquad(listlowpass)
-        # self.gain_1 = gainlowpass
-        # self.bandstopfilt_1 = Biquad(listbandstop)
-        # self.bandstopfilt_2 = Biquad(listbandstop)
-        # self.gain_2 = gainbandstop
+        # for filtering the EMG
+        self.lowpassfilt_1 = Biquad(listlowpass)
+        self.lowpassfilt_2 = Biquad(listlowpass)
+        self.gain_1 = gainlowpass
+        self.bandstopfilt_1 = Biquad(listbandstop)
+        self.bandstopfilt_2 = Biquad(listbandstop)
+        self.gain_2 = gainbandstop
 
         self.emg1 = AnalogIn(Pins.EMG_1)
         self.emg2 = AnalogIn(Pins.EMG_2)
@@ -47,16 +49,14 @@ class SensorState:
             # TODO: why is the filter implemented in send_to_pc? where does it come into play
             self.emg1_value = self.emg1.read()
             self.emg2_value = self.emg2.read()
+            
+            tf_1 = self.gain_1 * self.bandstopfilt_1.filter(self.emg1_value)
+            tf_2 = self.gain_2 * self.bandstopfilt_2.filter(self.emg2_value)
+            
+            tf_1 = abs(tf_1)
+            tf_2 = abs(tf_2)
+
+            self.emg1_f = self.lowpassfilt_1.filter(tf_1)
+            self.emg2_f = self.lowpassfilt_2.filter(tf_2)
 
 
-    # def send_to_pc(self):
-    #     # copied from low end emg practical
-    #     # to use for graphing in uscope, maybe needs a ticker?
-    #     # doubles over the emg.read() with update() but since this is only for debugging, it should be okay
-        
-    #     for i, emg in enumerate(self.emgs): 
-    #         self.pc.set(i, emg.read())
-    #         # TODO: ask about whether emgs = [AnalogIn('A0'), AnalogIn('A1')] takes a single emg two times or two emgs
-        
-    #     self.pc.set(2, self.gain_1*self.LP_100_10_1.filter(emg.read()))
-    #     self.pc.send()
