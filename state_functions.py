@@ -86,6 +86,9 @@ class StateFunctions:
 
             transformed_signal_1 = self.bandstopfilt_1.filter(tf_1)
             transformed_signal_2 = self.bandstopfilt_2.filter(tf_2)
+        else: 
+            transformed_signal_1 = (EMG_signal_1 - 0.5) / 5
+            transformed_signal_2 = (EMG_signal_2 - 0.5)
 
 
 
