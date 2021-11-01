@@ -75,6 +75,10 @@ class StateFunctions:
         self.write_servo_motor(self.servo_motor_value)
         self.listen_for_signal()
 
+
+
+
+
     def moving(self):
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
@@ -97,16 +101,20 @@ class StateFunctions:
 
             transformed_signal_1 = tf_1
             transformed_signal_2 = tf_2
+
+            # printing the emgs as graphs in uscope
             self.pc.set(0, tf_1)
             self.pc.set(1, EMG_signal_1)
             self.pc.set(2, tf_2)
             self.pc.set(3, EMG_signal_2)
-
             self.pc.send()
+
         else: 
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) / 5
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
 
+        print("these are the signal inputs:")
+        print(transformed_signal_1, transformed_signal_2)
 
 
         # TODO: add checks for joints to not exceed physical boundaries

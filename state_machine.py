@@ -14,7 +14,7 @@ class StateMachine:
         listbandstop = [-0.960616192564186621716260106040863320231,  0.919547137907040124105151335243135690689, 1.0, -1.000877940003687793790732030174694955349, 1.0]
         gainbandstop = 0.959773568953520062052575667621567845345
 
-        self.USE_POTMETERS = True
+        self.USE_POTMETERS = False
 
         self.robot_state = State()
         self.sensor_state = SensorState()
