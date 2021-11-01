@@ -17,8 +17,8 @@ class StateMachine:
         self.USE_POTMETERS = False
 
         self.robot_state = State()
-        self.sensor_state = SensorState()
-        self.state_functions = StateFunctions(self.robot_state, self.sensor_state, listlowpass, gainlowpass, listbandstop, gainbandstop, self.USE_POTMETERS ,ticker_freq)
+        self.sensor_state = SensorState(listlowpass, gainlowpass, listbandstop, gainbandstop,)
+        self.state_functions = StateFunctions(self.robot_state, self.sensor_state, self.USE_POTMETERS ,ticker_freq)
         self.ticker = Ticker(0, ticker_freq, self.run)
 
     def start(self):
