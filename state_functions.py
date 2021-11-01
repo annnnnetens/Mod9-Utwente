@@ -81,14 +81,22 @@ class StateFunctions:
         
         if not self.USE_PM:
             # Transformed signal - low filtered
-            tf_1 = self.gain_1 * self.lowpassfilt_1.filter(EMG_signal_1)
-            tf_2 = self.gain_2 * self.lowpassfilt_2.filter(EMG_signal_2)
 
-            transformed_signal_1 = self.bandstopfilt_1.filter(tf_1)
-            transformed_signal_2 = self.bandstopfilt_2.filter(tf_2)
+
+            tf_1 = self.gain_1 * self.bandstopfilt_1.filter(EMG_signal_1)
+            tf_2 = self.gain_2 * self.bandstopfilt_2.filter(EMG_signal_2)
+            
+            tf_1 = abs(tf_1)
+            tf_2 = abs(tf_2)
+
+            tf_1 = self.lowpassfilt_1.filter(tf_1)
+            tf_2 = self.lowpassfilt_2.filter(tf_2)
+
+            transformed_signal_1 = tf_1
+            transformed_signal_2 = tf_2
         else: 
-            transformed_signal_1 = (EMG_signal_1 - 0.5) / 5
-            transformed_signal_2 = (EMG_signal_2 - 0.5)
+            transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) / 5
+            transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
 
 
 
