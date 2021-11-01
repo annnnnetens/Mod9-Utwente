@@ -3,7 +3,7 @@ from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
 from biquad_filter import Biquad
-# from RKI import calculate_dq
+# from rki import calculate_dq
 
 
 # The statefunctions class can be extended by having the servo motor hold in a certain position.
@@ -37,6 +37,7 @@ class StateFunctions:
         self.servo_motor_value = 1
         self.q1 = 0
         self.q2 = 0
+        self.toggle_count = 0
         return
 
     def calibrating(self):
@@ -60,14 +61,16 @@ class StateFunctions:
         pass
 
     def toggling(self):
-        if self.servo_motor_value == 1:
-            self.servo_motor_value = -1
-        else:
-            self.servo_motor_value = 1
-        print("servo motor is now " + str(self.servo_motor_value))
+        # TODO: synchronize this with frequency of controller
+        if self.robot_state.is_changed():
+            if self.servo_motor_value == 1:
+                self.servo_motor_value = -1
+            else:
+                self.servo_motor_value = 1
+            self.robot_state.set(self.robot_state.current)
 
         self.stop_motor()
-        self.write_servo_motor(self.servo_motor_value)
+        self.write_servo_motor()
         self.listen_for_signal()
 
 
@@ -155,8 +158,8 @@ class StateFunctions:
             if self.robot_state.is_changed():
                 print("going to standby")
 
-    def write_servo_motor(self, value=0):
-        self.servo_motor.write(0.075 + 0.025*value)
+    def write_servo_motor(self):
+        self.servo_motor.write(0.075 + 0.025 * self.servo_motor_value)
 
     def stop_motor(self):
         self.motor_joint_arm.write(0)

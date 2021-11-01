@@ -3,7 +3,7 @@ import micropython
 import biorobotics
 
 
-class BlueSwitch:
+class Blueswitch:
     def __init__(self):
         self.switch_value = 0
         self.switch = pyb.Switch()
