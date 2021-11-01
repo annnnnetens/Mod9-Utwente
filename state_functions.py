@@ -3,7 +3,7 @@ from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
 from biquad_filter import Biquad
-# from rki import calculate_dq
+from rki import calculate_dq_j_inv
 
 
 # The statefunctions class can be extended by having the servo motor hold in a certain position.
@@ -79,9 +79,6 @@ class StateFunctions:
         self.listen_for_signal()
 
 
-
-
-
     def moving(self):
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
@@ -120,7 +117,7 @@ class StateFunctions:
         print(transformed_signal_1, transformed_signal_2)
 
 
-        # TODO: add checks for joints to not exceed physical boundaries
+        # TODO: add checks for joints to not exceed physical boundaries and integrate dq instead of transformed signal
         if (self.q1 >= 0.5 and transformed_signal_1 > 0) or (self.q1 <= -0.5 and transformed_signal_1 < 0):
             transformed_signal_1 = 0
             print("Joint 1 has reached it's bounds. Stopping the motor")
@@ -128,18 +125,15 @@ class StateFunctions:
             transformed_signal_2 = 0
             print("Joint 2 has reached it's bounds. Stopping the motor")
         print("Encoder value of base is " + str(self.sensor_state.motor1_sensor))
-        print("writing " + str(transformed_signal_1) + " and " + str(transformed_signal_2) +  " to motors")
+        # print("writing " + str(transformed_signal_1) + " and " + str(transformed_signal_2) +  " to motors")
         self.motor_joint_base.write(transformed_signal_1)
         self.motor_joint_arm.write(transformed_signal_2)
         # TODO: need to add position or velocity to the function below instead of 0, 0.4
-        # dq = calculate_dq(self.q1, self.q2, 0, 0.4)
-        conversion_rate = 64*131.25*self.frequency
+        dq = calculate_dq_j_inv(self.q1, self.q2, transformed_signal_1, transformed_signal_2)
         # TODO: need to incorparate the dq somewhere in the motors
         # self.motor_joint_base.write(dq[0]/conversion_rate)
         # self.motor_joint_arm.write(dq[1]/conversion_rate)
-        # self.q1 += dq[0]/self.frequency
-        # self.q2 += dq[1]/self.frequency
-        # print(dq)
+        print(dq)
         self.write_servo_motor()
         self.listen_for_signal()
 
