@@ -6,7 +6,6 @@ from biquad_filter import Biquad
 
 class SensorState:
     def __init__(self, listlowpass, gainlowpass, listbandstop, gainbandstop):
-        # TODO: what sensors are available to us?
         self.emg1_value = 0
         self.emg2_value = 0
         self.motor1_sensor = 0

@@ -1,8 +1,3 @@
-# TODO: add pin defintions
-# Encoder (two for each motor)
-# Two motors and one servo
-# EMG pins
-# Potmeter
 class Pins:
     MOTOR_1_DIRECTION = 'D4'
     MOTOR_1_PWN = 'D5'
