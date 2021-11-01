@@ -13,7 +13,7 @@ class Pins:
     Encoder_2_B = 'D11'
     SERVO_MOTOR = 'D3'
 
-    SERIAL_PC = 3 # only for graphing the EMG, not needed in the end
+    SERIAL_PC = 4 # only for graphing the EMG, not needed in the end
     EMG_1 = 'A0'
     EMG_2 = 'A1'
 
