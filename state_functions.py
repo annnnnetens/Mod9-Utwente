@@ -62,11 +62,14 @@ class StateFunctions:
         pass
 
     def toggling(self):
-        self.servo_motor_value =  -self.servo_motor_value
+        if self.servo_motor_value == 1:
+            self.servo_motor_value = -1
+        else:
+            self.servo_motor_value = 1
         print("servo motor is now " + str(self.servo_motor_value))
 
         self.stop_motor()
-        self.write_servo_motor()
+        self.write_servo_motor(self.servo_motor_value)
         self.listen_for_signal()
 
     def moving(self):
@@ -138,8 +141,8 @@ class StateFunctions:
             if self.robot_state.is_changed():
                 print("going to standby")
 
-    def write_servo_motor(self):
-        self.servo_motor.write(self.servo_motor_value)
+    def write_servo_motor(self, value=0):
+        self.servo_motor.write(0.075 + 0.025*value)
 
     def stop_motor(self):
         self.motor_joint_arm.write(0)
