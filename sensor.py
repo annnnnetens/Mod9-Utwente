@@ -1,7 +1,6 @@
-from biorobotics import AnalogIn, SerialPC, Encoder
+from biorobotics import AnalogIn, Encoder
 from pins import Pins
 from BlueSwitch import BlueSwitch
-from biquad_filter import Biquad
 
 
 class SensorState:
@@ -23,9 +22,6 @@ class SensorState:
         # self.bandstopfilt_1 = Biquad(listbandstop)
         # self.bandstopfilt_2 = Biquad(listbandstop)
         # self.gain_2 = gainbandstop
-
-        # need this PC to write to uscope
-        self.pc = SerialPC(Pins.SERIAL_PC)
 
         self.emg1 = AnalogIn(Pins.EMG_1)
         self.emg2 = AnalogIn(Pins.EMG_2)

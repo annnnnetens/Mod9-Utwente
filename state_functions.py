@@ -1,7 +1,7 @@
 from states import State
 from motor import Motor
 from pins import Pins
-from biorobotics import PWM
+from biorobotics import PWM, SerialPC
 from biquad_filter import Biquad
 # from RKI import calculate_dq
 
@@ -24,6 +24,9 @@ class StateFunctions:
         self.motor_joint_base = Motor(Pins.MOTOR_1_DIRECTION, Pins.MOTOR_1_PWN, ticker_frequency)
         self.motor_joint_arm = Motor(Pins.MOTOR_2_DIRECTION, Pins.MOTOR_2_PWM, ticker_frequency)
         self.servo_motor = PWM(Pins.SERVO_MOTOR, ticker_frequency)
+
+        # need this PC to write to uscope
+        self.pc = SerialPC(Pins.SERIAL_PC)
         
         # for filtering the EMG
         self.lowpassfilt_1 = Biquad(listlowpass)
@@ -94,6 +97,12 @@ class StateFunctions:
 
             transformed_signal_1 = tf_1
             transformed_signal_2 = tf_2
+            self.pc.set(0, tf_1)
+            self.pc.set(1, EMG_signal_1)
+            self.pc.set(2, tf_2)
+            self.pc.set(3, EMG_signal_2)
+
+            self.pc.send()
         else: 
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) / 5
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
