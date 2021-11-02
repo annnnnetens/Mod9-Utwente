@@ -83,7 +83,7 @@ def matinv2x2(M):
 
 
 def calculate_dq_j_inv(q1, q2, vx, vy):
-    L3 = 0.015
+    L3 = 0.028
     reference_configuration = np.array([
         [1, 0, L3],
         [0, 1, 0.425],
