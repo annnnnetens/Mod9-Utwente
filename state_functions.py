@@ -85,8 +85,8 @@ class StateFunctions:
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
             # TODO: need to convert the EMG to [-1, 1] range or something
-            transformed_signal_1 = EMG_signal_1 / self.max_emg_1
-            transformed_signal_2 = EMG_signal_2 / self.max_emg_2
+            transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
+            transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
 
             # printing the emgs as graphs in uscope
             self.pc.set(0, self.sensor_state.emg1_value)

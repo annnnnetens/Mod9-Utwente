@@ -4,7 +4,7 @@ from blueswitch import Blueswitch
 from biquad_filter import Biquad
 
 class SensorState:
-    def __init__(self, listlowpass, gainlowpass, listbandstop, gainbandstop):
+    def __init__(self, listlowpass, gainlowpass, listbandstop, gainbandstop, listhighpass):
         self.emg1_value = 0
         self.emg1_f = 0
         self.emg2_f = 0
@@ -24,6 +24,8 @@ class SensorState:
         self.bandstopfilt_1 = Biquad(listbandstop)
         self.bandstopfilt_2 = Biquad(listbandstop)
         self.gain_2 = gainbandstop
+        self.highpassfilt_1 = Biquad(listhighpass)
+        self.highpassfilt_2 = Biquad(listhighpass)
 
         self.emg1 = AnalogIn(Pins.EMG_1)
         self.emg2 = AnalogIn(Pins.EMG_2)
@@ -52,14 +54,17 @@ class SensorState:
             # TODO: why is the filter implemented in send_to_pc? where does it come into play
             self.emg1_value = self.emg1.read()
             self.emg2_value = self.emg2.read()
+
+            tf_1 = self.highpassfilt_1.filter(self.emg1_value)
+            tf_2 = self.highpassfilt_2.filter(self.emg2_value)
             
-            tf_1 = self.gain_1 * self.bandstopfilt_1.filter(self.emg1_value)
-            tf_2 = self.gain_2 * self.bandstopfilt_2.filter(self.emg2_value)
+            tf_1 = self.gain_1 * self.bandstopfilt_1.filter(tf_1)
+            tf_2 = self.gain_1 * self.bandstopfilt_2.filter(tf_2)
             
             tf_1 = abs(tf_1)
             tf_2 = abs(tf_2)
 
-            self.emg1_f = self.lowpassfilt_1.filter(tf_1)
-            self.emg2_f = self.lowpassfilt_2.filter(tf_2)
+            self.emg1_f = self.lowpassfilt_1.filter(tf_1) * self.gain_2
+            self.emg2_f = self.lowpassfilt_2.filter(tf_2) * self.gain_2
 
 
