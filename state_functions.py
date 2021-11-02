@@ -30,8 +30,8 @@ class StateFunctions:
 
         self.USE_PM = use_pm
 
-        self.max_emg_1 = 1
-        self.max_emg_2 = 1
+        self.max_emg_1 = 0.01
+        self.max_emg_2 = 0.01
 
         self.frequency = ticker_frequency
         self.servo_motor_value = 1
@@ -50,6 +50,9 @@ class StateFunctions:
             self.robot_state.set(self.robot_state.current)
         elif switch_val:
             print("\nCalibration done! Have fun with drawing\n")
+            # Reads the encoder values at the instant of pressing the button, so the encoders are "reset to zero"
+            self.sensor_state.encoder_def_1 = self.sensor_state.motor1_sensor
+            self.sensor_state.encoder_def_2 = self.sensor_state.motor2_sensor
             self.robot_state.set(State.STAND_BY)
 
     def standby(self):
@@ -137,15 +140,15 @@ class StateFunctions:
         """
 
         switch_val = self.sensor_state.switch_value
-        EMG_signal_1 = self.sensor_state.emg1_value
-        EMG_signal_2 = self.sensor_state.emg2_value
+        EMG_signal_1 = self.sensor_state.emg1_f
+        EMG_signal_2 = self.sensor_state.emg2_f
 
         # print("signal 1 is " + str(EMG_signal_1) + "signal 2 is " + str(EMG_signal_2) + " and blueswitch is " + str(switch_val))
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
             print("going to toggling")
         # Just using stub values here. Feel free to change
-        elif EMG_signal_1 > 0.75 or EMG_signal_1 < 0.25 or EMG_signal_2 > 0.75 or EMG_signal_2 < 0.25:
+        elif abs(EMG_signal_1) > 0.1 or abs(EMG_signal_2)>0.1:
             self.robot_state.set(State.MOVING)
             if self.robot_state.is_changed():
                 print("going to moving")

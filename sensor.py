@@ -12,6 +12,8 @@ class SensorState:
         self.motor1_sensor = 0
         self.motor2_sensor = 0
         self.switch_value = 0
+        self.encoder_def_1 = 0
+        self.encoder_def_2 = 0
         
         # define encoders for motors 1 and 2
         self.pins_encoder_1 = Encoder(Pins.Encoder_1_A, Pins.Encoder_1_B)
@@ -37,8 +39,8 @@ class SensorState:
     def update(self, USE_POTMETERS=True):
         
         self.switch_value = self.blueswitch.value()
-        self.motor1_sensor = self.pins_encoder_1.counter()
-        self.motor2_sensor = self.pins_encoder_2.counter()
+        self.motor1_sensor = self.pins_encoder_1.counter() - self.encoder_def_1
+        self.motor2_sensor = self.pins_encoder_2.counter() - self.encoder_def_2
 
             # TODO: read sensor values and update them.
             # TODO: add encoder to this.
@@ -51,7 +53,7 @@ class SensorState:
 
         else:
             # TODO: the values need to be adjusted to be in range of [0, 1] or something
-            # TODO: why is the filter implemented in send_to_pc? where does it come into play
+
             self.emg1_value = self.emg1.read()
             self.emg2_value = self.emg2.read()
 
