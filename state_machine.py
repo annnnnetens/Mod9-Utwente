@@ -9,10 +9,10 @@ class StateMachine:
     def __init__(self, ticker_freq):
         # 6Hz cut off, sample frequency 1000 Hz, order 2 Butterworth low pass  - for EMG
         listlowpass = [-1.9467,   0.9481, 0.000346, 0.0006921, 0.000346]
-        gainlowpass = 0.009525762376195455113925270040908799274
+        gainlowpass = 1
         # 48-52 band stop Butterworth - for EMG
         listbandstop = [-0.960616192564186621716260106040863320231,  0.919547137907040124105151335243135690689, 1.0, -1.000877940003687793790732030174694955349, 1.0]
-        gainbandstop = 0.959773568953520062052575667621567845345
+        gainbandstop = 15
 
         self.USE_POTMETERS = False
 

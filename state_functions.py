@@ -12,7 +12,7 @@ from rki import calculate_dq_j_inv
 # Also can be extended by ramping up the speed of the servo motor when lifting/lowering the pencil
 class StateFunctions:
 
-    def __init__(self, robot_state, sensor_state, listlowpass, gainlowpass, listbandstop, gainbandstop, use_pm, ticker_frequency):
+    def __init__(self, robot_state, sensor_state, use_pm, ticker_frequency):
         self.robot_state = robot_state
         self.sensor_state = sensor_state
         self.callbacks = {
@@ -30,8 +30,8 @@ class StateFunctions:
 
         self.USE_PM = use_pm
 
-        self.max_emg_1 = 1
-        self.max_emg_2 = 1
+        self.max_emg_1 = 0.01
+        self.max_emg_2 = 0.01
 
         self.frequency = ticker_frequency
         self.servo_motor_value = 1
@@ -85,8 +85,8 @@ class StateFunctions:
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
             # TODO: need to convert the EMG to [-1, 1] range or something
-            transformed_signal_1 = EMG_signal_1 / self.max_emg_1
-            transformed_signal_2 = EMG_signal_2 / self.max_emg_2
+            transformed_signal_1 = EMG_signal_1
+            transformed_signal_2 = EMG_signal_2
 
             # printing the emgs as graphs in uscope
             self.pc.set(0, self.sensor_state.emg1_value)
@@ -137,15 +137,15 @@ class StateFunctions:
         """
 
         switch_val = self.sensor_state.switch_value
-        EMG_signal_1 = self.sensor_state.emg1_value
-        EMG_signal_2 = self.sensor_state.emg2_value
+        EMG_signal_1 = self.sensor_state.emg1_f
+        EMG_signal_2 = self.sensor_state.emg2_f
 
         # print("signal 1 is " + str(EMG_signal_1) + "signal 2 is " + str(EMG_signal_2) + " and blueswitch is " + str(switch_val))
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
             print("going to toggling")
         # Just using stub values here. Feel free to change
-        elif EMG_signal_1 > 0.75 or EMG_signal_1 < 0.25 or EMG_signal_2 > 0.75 or EMG_signal_2 < 0.25:
+        elif abs(EMG_signal_1) > 0.1 or abs(EMG_signal_2)>0.1:
             self.robot_state.set(State.MOVING)
             if self.robot_state.is_changed():
                 print("going to moving")
