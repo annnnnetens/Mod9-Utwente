@@ -50,6 +50,9 @@ class StateFunctions:
             self.robot_state.set(self.robot_state.current)
         elif switch_val:
             print("\nCalibration done! Have fun with drawing\n")
+            # Reads the encoder values at the instant of pressing the button, so the encoders are "reset to zero"
+            self.sensor_state.encoder_def_1 = self.sensor_state.motor1_sensor
+            self.sensor_state.encoder_def_2 = self.sensor_state.motor2_sensor
             self.robot_state.set(State.STAND_BY)
 
     def standby(self):
