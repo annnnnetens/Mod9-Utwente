@@ -14,7 +14,7 @@ class SensorState:
         self.switch_value = 0
         self.encoder_def_1 = 0
         self.encoder_def_2 = 0
-        
+
         # define encoders for motors 1 and 2
         self.pins_encoder_1 = Encoder(Pins.Encoder_1_A, Pins.Encoder_1_B)
         self.pins_encoder_2 = Encoder(Pins.Encoder_2_A, Pins.Encoder_2_B)
@@ -37,6 +37,8 @@ class SensorState:
     def update(self, USE_POTMETERS=True):
         
         self.switch_value = self.blueswitch.value()
+        # print("encoder 1 is " + str(self.pins_encoder_1.counter() - self.encoder_def_1))
+        # print("encoder 2 is " + str(self.pins_encoder_2.counter() - self.encoder_def_2))
         self.motor1_sensor = self.pins_encoder_1.counter() - self.encoder_def_1
         self.motor2_sensor = self.pins_encoder_2.counter() - self.encoder_def_2
 
@@ -46,6 +48,8 @@ class SensorState:
         if USE_POTMETERS:
             self.emg1_value = self.potmeter1.read()
             self.emg2_value = self.potmeter2.read()
+            self.emg1_f = (self.potmeter1.read() - 0.5) * 2
+            self.emg2_f = (self.potmeter2.read() - 0.5) * 2
         else:
             # TODO: the values need to be adjusted to be in range of [0, 1] or something
 
@@ -54,8 +58,8 @@ class SensorState:
 
             self.emg1_value = self.emg1_value - 0.46
             self.emg2_value = self.emg2_value - 0.46
-            
-            tf_1 = self.bandstopfilt_1.filter(self.emg1_value) * self.gain_1 
+
+            tf_1 = self.bandstopfilt_1.filter(self.emg1_value) * self.gain_1
             tf_2 = self.bandstopfilt_2.filter(self.emg2_value) * self.gain_1
             
             tf_1 = abs(tf_1)
@@ -63,7 +67,7 @@ class SensorState:
 
             tf_1 = self.lowpassfilt_1.filter(tf_1) * self.gain_2
             tf_2 = self.lowpassfilt_2.filter(tf_2) * self.gain_2
-            
+
 
 
             # tf_1 = 2 * (tf_1 - 0.5)
@@ -72,8 +76,8 @@ class SensorState:
             self.emg1_f = tf_1
             self.emg2_f = tf_2
             print('printing values')
-            print(self.emg1_f, self.emg1_value) 
-            print(self.emg2_f, self.emg2_value) 
+            print(self.emg1_f, self.emg1_value)
+            print(self.emg2_f, self.emg2_value)
 
 
 
