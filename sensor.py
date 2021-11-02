@@ -44,6 +44,9 @@ class SensorState:
         if USE_POTMETERS:
             self.emg1_value = self.potmeter1.read()
             self.emg2_value = self.potmeter2.read()
+            self.emg1_f = self.emg1_value
+            self.emg2_f = self.emg2_value
+
         else:
             # TODO: the values need to be adjusted to be in range of [0, 1] or something
             # TODO: why is the filter implemented in send_to_pc? where does it come into play

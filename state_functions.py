@@ -12,7 +12,7 @@ from rki import calculate_dq_j_inv
 # Also can be extended by ramping up the speed of the servo motor when lifting/lowering the pencil
 class StateFunctions:
 
-    def __init__(self, robot_state, sensor_state, listlowpass, gainlowpass, listbandstop, gainbandstop, use_pm, ticker_frequency):
+    def __init__(self, robot_state, sensor_state, use_pm, ticker_frequency):
         self.robot_state = robot_state
         self.sensor_state = sensor_state
         self.callbacks = {
