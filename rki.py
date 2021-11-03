@@ -82,7 +82,8 @@ def matinv2x2(M):
     return res
 
 
-def endpoint(q1, q2):
+def endpoint(angle1, angle2): #TODO: this is incorrect! the endpoint is not at the end of the arm exactly
+    # it has an extra angle!
     ex = -0.185 * math.sin((angle1 + angle2) * pi) - 0.24 * math.sin(angle1 * pi)
     ey = 0.185 * math.cos((angle1 + angle2) * pi) + 0.24 * math.cos(angle1 * pi)
     return ex, ey

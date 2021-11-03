@@ -115,14 +115,14 @@ class StateFunctions:
         if abs(transformed_signal_2) > 1:
             transformed_signal_2 = transformed_signal_2/abs(transformed_signal_2)
 
-        endpoint_x, endpoint_y = endpoint(self.q1, self.q2)
+        # endpoint_x, endpoint_y = endpoint(self.q1, self.q2)
 
-        x_new = endpoint_x + transformed_signal_1 / self.frequency # assuming that first signal is in the x direction
-        y_new = endpoint_y + transformed_signal_2 / self.frequency
+        # x_new = endpoint_x + transformed_signal_1 / self.frequency # assuming that first signal is in the x direction
+        # y_new = endpoint_y + transformed_signal_2 / self.frequency
 
         dq = calculate_dq_j_inv(self.q1, self.q2, transformed_signal_1, transformed_signal_2)
 
-        q1_error = dq[0][0] / self.frequency # reference angle - current angle
+        q1_error = dq[0][0] / self.frequency # (reference angle - current angle)*delta t
         q2_error = dq[1][0] / self.frequency
         
         # TODO: need to incorparate the dq somewhere in the motors
