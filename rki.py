@@ -27,21 +27,19 @@ def brockett(h0_matrix, twistspairs):
     If degrees is true it is assumed that q is in degrees (for example q = 45)
     If degrees is false it is assumed that q is in radians (for example q = 0.25) (so no multiplng with pi!)
     """
-    res = np.eye(3)
+    result = np.eye(3)
     for twistpair in twistspairs:
         current_matrix = np.eye(3)
         twist = twistpair[0]
         q = twistpair[1]
         if twist[0] == 0:
             # Translational joint
-            if (math.sqrt(twist[1] ** 2 + twist[2] ** 2) - 1) > 0.01:
-                raise ValueError("There is a non unit twist in brockett")
             x = twist[1]
             y = twist[2]
             current_matrix[0, 2] = x * q
             current_matrix[1, 2] = y * q
 
-            res = matrix_multiplication(res, current_matrix)
+            result = matrix_multiplication(result, current_matrix)
         elif twist[0] == 1:
             # Rotational joint
             c = math.cos(q * pi)
@@ -51,11 +49,9 @@ def brockett(h0_matrix, twistspairs):
             y = twist[1]
             current_matrix[0, 2] = x - x * c + y * s
             current_matrix[1, 2] = y - x * s - y * c
-            res = matrix_multiplication(res, current_matrix)
-        else:
-            raise ValueError("There is a non unit twist in brockett")
-    res = matrix_multiplication(res, h0_matrix)
-    return res
+            result = matrix_multiplication(result, current_matrix)
+    result = matrix_multiplication(result, h0_matrix)
+    return result
 
 
 def jacobian_angles(q1):
