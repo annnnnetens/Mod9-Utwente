@@ -9,7 +9,7 @@ class StateMachine:
     def __init__(self, ticker_freq):
         # 6Hz cut off, sample frequency 1000 Hz, order 2 Butterworth low pass  - for EMG
         # listlowpass = [-1.9467,   0.9481, 0.000346, 0.0006921, 0.000346] # quite smooth! 1000Hz
-        listlowpass = [-1.8227, 0.8372, 0.0036, 0.0072, 0.0036] # with 300Hz
+        listlowpass = [-1.8227, 0.8372, 0.0036, 0.0072, 0.0036] # with 300Hz at 6Hz cutoff
         gainlowpass = 1
         # listlowpass = [0.3695, 0.1958, 0.3913, 0.7827, 0.3913] # really noisy
         # listlowpass = [-0.7478, 0.2722, 0.1311, 0.2622, 0.1311]
@@ -18,7 +18,7 @@ class StateMachine:
         gainbandstop = 1/0.06
 
         # listhighpass = [-1.889, 0.8949, 0.9460, -1.8920, 0.9460] # with 1000hz
-        listhighpass = [-1.9704, 0.9708, 0.9853, -1.9706, 0.9853] # with 300hz
+        listhighpass = [-1.9704, 0.9708, 0.9853, -1.9706, 0.9853] # with 300hz at 1 Hz cutoff
 
 
 
