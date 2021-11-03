@@ -3,7 +3,7 @@ from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
 from biquad_filter import Biquad
-from rki import calculate_dq_j_inv
+from rki import calculate_dq_j_inv, endpoint
 from controller import Controller
 
 
@@ -83,13 +83,12 @@ class StateFunctions:
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
 
-        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2
-        self.q2 = self.sensor_state.motor2_sensor / 131.25 / 64 * 2
+        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2 # now there are 2 q1 in one rotation
+        self.q2 = self.sensor_state.motor2_sensor / 131.25 / 64 * 2 # q1 and q2 are therefore in radians*pi
         if not self.USE_PM:
 
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
-            # TODO: need to convert the EMG to [-1, 1] range or something
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
 
@@ -105,21 +104,20 @@ class StateFunctions:
             EMG_signal_2 = self.sensor_state.emg2_value
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) / 10
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5) / 10
-            if abs(transformed_signal_1) < 0.015:
-                transformed_signal_1 = 0
-            if abs(transformed_signal_2) < 0.015:
-                transformed_signal_2 = 0
 
-        # print("these are the signal inputs:")
-        # print(transformed_signal_1, transformed_signal_2)
+        if abs(transformed_signal_1) < 0.015:
+            transformed_signal_1 = 0
+        if abs(transformed_signal_2) < 0.015:
+            transformed_signal_2 = 0
+
+        endpoint_x, endpoint_y = endpoint(self.q1, self.q2)
+
+        v_x = (endpoint_x - transformed_signal_1) * self.frequency # assuming that first signal is in the x direction
+        v_y = (endpoint_y - transformed_signal_2) * self.frequency
 
 
-        # print("These are the encoder values")
-        # print(self.sensor_state.motor1_sensor, self.sensor_state.motor2_sensor)
-        # print("writing " + str(transformed_signal_1) + " and " + str(transformed_signal_2) +  " to motors")
-        # self.motor_joint_base.write(transformed_signal_1)
-        # self.motor_joint_arm.write(transformed_signal_2)
-        dq = calculate_dq_j_inv(self.q1, self.q2, transformed_signal_1, transformed_signal_2)
+        dq = calculate_dq_j_inv(self.q1, self.q2, v_x, v_y)
+        
         # TODO: need to incorparate the dq somewhere in the motors
 
         # dq1_factor = dq[0][0]
