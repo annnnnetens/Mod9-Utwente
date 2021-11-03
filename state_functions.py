@@ -109,6 +109,11 @@ class StateFunctions:
             transformed_signal_1 = 0
         if abs(transformed_signal_2) < 0.015:
             transformed_signal_2 = 0
+        # checks for EMG values larger than one and resets them to one
+        if abs(transformed_signal_1) > 1:
+            transformed_signal_1 = transformed_signal_1/abs(transformed_signal_1)
+        if abs(transformed_signal_2) > 1:
+            transformed_signal_2 = transformed_signal_2/abs(transformed_signal_2)
 
         endpoint_x, endpoint_y = endpoint(self.q1, self.q2)
 
