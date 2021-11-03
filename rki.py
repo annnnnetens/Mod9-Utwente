@@ -75,6 +75,7 @@ def matinv2x2(M):
     res[0, 0] = M[1, 1]/det
     res[1, 1] = M[0, 0]/det
     res[1, 0] = - M[1, 0]/det
+    res[0, 1] = - M[0, 1]/det
     return res
 
 
