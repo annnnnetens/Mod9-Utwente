@@ -131,6 +131,8 @@ def matrix_multiplication(a, b):
 
 if __name__ == "__main__":
     if on_microcontroller:
+        pass
+    else:
         # For testing
         identity = np.eye(3)
         H4 = np.array([
@@ -165,3 +167,10 @@ if __name__ == "__main__":
 
         plt.plot(xx, yy, 'bo')
         plt.show()
+        
+        q1 = 0
+        q2 = 0
+        [xnorm,ynorm] = endpoint(1.5/180 + q1/180, 0.6/180 + q2/180)
+        [xdev, ydev] = endpoint(q1/180, q2/180)
+        leng = np.sqrt((xnorm-xdev)**2 + (ynorm-ydev)**2)
+        print(xnorm, ynorm, xdev, ydev, leng)
