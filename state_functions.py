@@ -135,7 +135,7 @@ class StateFunctions:
         if (self.q1 >= 0.5 and voltage_1 > 0) or (self.q1 <= -0.5 and voltage_2 < 0):
             voltage_1 = 0
             print("Joint 1 has reached it's bounds. Stopping the motor")
-        if (self.q2 >= 7 / 18 and voltage_2 > 0) or (self.q2 <= -7 / 18 and voltage_2 > 0):
+        if (self.q2 >= 12.5 / 18 and voltage_2 > 0) or (self.q2 <= -12.5 / 18 and voltage_2 > 0):
             voltage_2 = 0
             print("Joint 2 has reached it's bounds. Stopping the motor")
         self.motor_joint_base.write(voltage_1)
