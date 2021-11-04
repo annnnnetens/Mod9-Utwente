@@ -1,4 +1,4 @@
-from numpy.core.fromnumeric import size
+# from numpy.core.fromnumeric import size
 from states import State
 from motor import Motor
 from pins import Pins
