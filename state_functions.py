@@ -1,10 +1,11 @@
+from numpy.core.fromnumeric import size
 from states import State
 from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
-from biquad_filter import Biquad
-from rki import calculate_dq_j_inv, endpoint
+from rki import calculate_dq_j_inv
 from controller import Controller
+from math import sqrt
 
 
 # The statefunctions class can be extended by having the servo motor hold in a certain position.
@@ -33,6 +34,7 @@ class StateFunctions:
 
         self.max_emg_1 = 0.01
         self.max_emg_2 = 0.01
+        self.max_speed = 0.02
 
         self.frequency = ticker_frequency
         self.servo_motor_value = 1
@@ -89,7 +91,7 @@ class StateFunctions:
 
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
-            transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
+            transformed_signal_1 = 2 * (EMG_signal_1 - 0.5)
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
 
             # printing the emgs as graphs in uscope
@@ -102,30 +104,29 @@ class StateFunctions:
         else:
             EMG_signal_1 = self.sensor_state.emg1_value
             EMG_signal_2 = self.sensor_state.emg2_value
-            transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) / 10
-            transformed_signal_2 = 2 * (EMG_signal_2 - 0.5) / 10
+            transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
+            transformed_signal_2 = 2 * (EMG_signal_2 - 0.5) 
 
         if abs(transformed_signal_1) < 0.015:
             transformed_signal_1 = 0
         if abs(transformed_signal_2) < 0.015:
             transformed_signal_2 = 0
-        # checks for EMG values larger than one and resets them to one
+        # checks for EMG values larger than one and resets them to one. Could be also a bit lower than 1, to saturate
         if abs(transformed_signal_1) > 1:
             transformed_signal_1 = transformed_signal_1/abs(transformed_signal_1)
         if abs(transformed_signal_2) > 1:
             transformed_signal_2 = transformed_signal_2/abs(transformed_signal_2)
 
-        # endpoint_x, endpoint_y = endpoint(self.q1, self.q2)
-
-        # x_new = endpoint_x + transformed_signal_1 / self.frequency # assuming that first signal is in the x direction
-        # y_new = endpoint_y + transformed_signal_2 / self.frequency
+        # the diagonal values are larger! Need to normalize and only allow :
+        value_speed = sqrt(transformed_signal_1**2 + transformed_signal_2 ** 2)
+        transformed_signal_1 = transformed_signal_1 * self.max_speed / value_speed
+        transformed_signal_2 = transformed_signal_2 * self.max_speed / value_speed
 
         dq = calculate_dq_j_inv(self.q1, self.q2, transformed_signal_1, transformed_signal_2)
 
         q1_error = dq[0][0] / self.frequency # (reference angle - current angle)*delta t
         q2_error = dq[1][0] / self.frequency
         
-        # TODO: need to incorparate the dq somewhere in the motors
 
         voltage_1 = self.dq1_controller.transfer(q1_error)
         voltage_2 = self.dq2_controller.transfer(q2_error)

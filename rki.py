@@ -165,9 +165,9 @@ if __name__ == "__main__":
         plt.plot(xx, yy, 'bo')
         plt.show()
         
-        q1 = 0
+        q1 = 45
         q2 = 0
-        [xnorm,ynorm] = endpoint(1.5/180 + q1/180, 0.6/180 + q2/180)
+        [xnorm,ynorm] = endpoint(1.5/180/13.5*5 + q1/180, 0.6/180/13.5*5 + q2/180)
         [xdev, ydev] = endpoint(q1/180, q2/180)
         leng = np.sqrt((xnorm-xdev)**2 + (ynorm-ydev)**2)
         print(xnorm, ynorm, xdev, ydev, leng)
