@@ -3,7 +3,7 @@ from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
 from biquad_filter import Biquad
-from rki import calculate_dq_j_inv
+from rki import calculate_dq_j_inv, endpoint
 from controller import Controller
 
 
@@ -83,13 +83,12 @@ class StateFunctions:
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
 
-        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2
-        self.q2 = self.sensor_state.motor2_sensor / 131.25 / 64 * 2
+        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2 # now there are 2 q1 in one rotation
+        self.q2 = self.sensor_state.motor2_sensor / 131.25 / 64 * 2 # q1 and q2 are therefore in radians*pi
         if not self.USE_PM:
 
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
-            # TODO: need to convert the EMG to [-1, 1] range or something
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
 
@@ -105,40 +104,46 @@ class StateFunctions:
             EMG_signal_2 = self.sensor_state.emg2_value
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) / 10
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5) / 10
-            if abs(transformed_signal_1) < 0.015:
-                transformed_signal_1 = 0
-            if abs(transformed_signal_2) < 0.015:
-                transformed_signal_2 = 0
 
-        # print("these are the signal inputs:")
-        # print(transformed_signal_1, transformed_signal_2)
+        if abs(transformed_signal_1) < 0.015:
+            transformed_signal_1 = 0
+        if abs(transformed_signal_2) < 0.015:
+            transformed_signal_2 = 0
+        # checks for EMG values larger than one and resets them to one
+        if abs(transformed_signal_1) > 1:
+            transformed_signal_1 = transformed_signal_1/abs(transformed_signal_1)
+        if abs(transformed_signal_2) > 1:
+            transformed_signal_2 = transformed_signal_2/abs(transformed_signal_2)
 
+        # endpoint_x, endpoint_y = endpoint(self.q1, self.q2)
 
-        # print("These are the encoder values")
-        # print(self.sensor_state.motor1_sensor, self.sensor_state.motor2_sensor)
-        # print("writing " + str(transformed_signal_1) + " and " + str(transformed_signal_2) +  " to motors")
-        # self.motor_joint_base.write(transformed_signal_1)
-        # self.motor_joint_arm.write(transformed_signal_2)
+        # x_new = endpoint_x + transformed_signal_1 / self.frequency # assuming that first signal is in the x direction
+        # y_new = endpoint_y + transformed_signal_2 / self.frequency
+
         dq = calculate_dq_j_inv(self.q1, self.q2, transformed_signal_1, transformed_signal_2)
+
+        q1_error = dq[0][0] / self.frequency # (reference angle - current angle)*delta t
+        q2_error = dq[1][0] / self.frequency
+        
         # TODO: need to incorparate the dq somewhere in the motors
 
-        # dq1_factor = dq[0][0]
-        dq1_factor = self.dq1_controller.transfer(dq[0][0])
-        dq2_factor = self.dq2_controller.transfer(dq[1][0])
+        voltage_1 = self.dq1_controller.transfer(q1_error)
+        voltage_2 = self.dq2_controller.transfer(q2_error)
+
         # TODO: add checks for joints to not exceed physical boundaries and integrate dq instead of transformed signal
-        if (self.q1 >= 0.5 and dq1_factor > 0) or (self.q1 <= -0.5 and dq1_factor < 0):
-            dq1_factor = 0
+        if (self.q1 >= 0.5 and voltage_1 > 0) or (self.q1 <= -0.5 and voltage_2 < 0):
+            voltage_1 = 0
             print("Joint 1 has reached it's bounds. Stopping the motor")
-        if (self.q2 >= 7 / 18 and dq2_factor > 0) or (self.q2 <= -7 / 18 and dq2_factor > 0):
-            dq2_factor = 0
+        if (self.q2 >= 7 / 18 and voltage_2 > 0) or (self.q2 <= -7 / 18 and voltage_2 > 0):
+            voltage_2 = 0
             print("Joint 2 has reached it's bounds. Stopping the motor")
-        self.motor_joint_base.write(dq1_factor)
+        self.motor_joint_base.write(voltage_1)
         # dq2_factor = dq[1][0]
-        self.motor_joint_arm.write(dq2_factor)
-        print("Current velocity, angles and angel rotations")
+        self.motor_joint_arm.write(voltage_2)
+        print("Current velocity, angles and voltages")
         print(transformed_signal_1, transformed_signal_2)
         print(self.q1, self.q2)
-        print(dq1_factor, dq2_factor)
+        print(voltage_1, voltage_2)
         self.write_servo_motor()
         self.listen_for_signal()
 

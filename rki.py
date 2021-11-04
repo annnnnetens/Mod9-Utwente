@@ -79,6 +79,13 @@ def matinv2x2(M):
     return res
 
 
+def endpoint(angle1, angle2): #TODO: this is incorrect! the endpoint is not at the end of the arm exactly
+    # it has an extra angle!
+    ex = -0.185 * math.sin((angle1 + angle2) * pi) - 0.24 * math.sin(angle1 * pi)
+    ey = 0.185 * math.cos((angle1 + angle2) * pi) + 0.24 * math.cos(angle1 * pi)
+    return ex, ey
+
+
 def calculate_dq_j_inv(q1, q2, vx, vy):
     L3 = 0.028
     reference_configuration = np.array([
@@ -121,6 +128,8 @@ def matrix_multiplication(a, b):
 
 if __name__ == "__main__":
     if on_microcontroller:
+        pass
+    else:
         # For testing
         identity = np.eye(3)
         H4 = np.array([
@@ -155,3 +164,10 @@ if __name__ == "__main__":
 
         plt.plot(xx, yy, 'bo')
         plt.show()
+        
+        q1 = 0
+        q2 = 0
+        [xnorm,ynorm] = endpoint(1.5/180 + q1/180, 0.6/180 + q2/180)
+        [xdev, ydev] = endpoint(q1/180, q2/180)
+        leng = np.sqrt((xnorm-xdev)**2 + (ynorm-ydev)**2)
+        print(xnorm, ynorm, xdev, ydev, leng)
