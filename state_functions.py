@@ -107,9 +107,9 @@ class StateFunctions:
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5) 
 
-        if abs(transformed_signal_1) < 0.015:
+        if abs(transformed_signal_1) < 0.2: # 0.2 for anete for 5Hz cutoff, was 0.015
             transformed_signal_1 = 0
-        if abs(transformed_signal_2) < 0.015:
+        if abs(transformed_signal_2) < 0.2:
             transformed_signal_2 = 0
         # checks for EMG values larger than one and resets them to one. Could be also a bit lower than 1, to saturate
         if abs(transformed_signal_1) > 1:
