@@ -1,6 +1,6 @@
 class Controller:
-    def __init__(self):
-        pass
+    def __init__(self, kp):
+        self.kp = kp
 
     def control(self, error):
-        return error
+        return self.kp * error

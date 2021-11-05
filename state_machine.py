@@ -21,7 +21,7 @@ class StateMachine:
 
 
 
-        self.USE_POTMETERS = False
+        self.USE_POTMETERS = True
 
         self.robot_state = State()
         self.sensor_state = SensorState(listlowpass, gainlowpass, listbandstop, gainbandstop, listhighpass)

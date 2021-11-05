@@ -101,8 +101,8 @@ def calculate_dq_j_inv(q1, q2, x_des, y_des):
                           [0, 1, -pe0[1][0]],
                           [0, 0, 1]])
     else:
-        vx = x_des - pe0[0][0]
-        vy = y_des - pe0[1][0]
+        vx = x_des - pe0[0]
+        vy = y_des - pe0[1]
         H_0_f = np.array([[1, 0, -pe0[0]],
                         [0, 1, -pe0[1]],
                         [0, 0, 1]])
@@ -124,9 +124,25 @@ def matrix_multiplication(a, b):
     else:
         return a @ b
 
+def calc_pos(q1, q2):
+    L3 = 0.028
+    reference_configuration = np.array([
+        [1, 0, L3],
+        [0, 1, 0.425],
+        [0, 0, 1]
+    ])
+    reference_twist1 = unit_twist_rotational(0, 0)
+    reference_twist2 = unit_twist_rotational(0, 0.24)
+    He0 = brockett(reference_configuration, [(reference_twist1, q1), (reference_twist2, q2)])
+    return He0[:2, 2]
+
+
+
 
 if __name__ == "__main__":
     if on_microcontroller:
+        pass
+    else:
         # For testing
         identity = np.eye(3)
         H4 = np.array([
