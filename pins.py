@@ -15,5 +15,5 @@ class Pins:
 
     SERIAL_PC = 4 # only for graphing the EMG, not needed in the end
     EMG_1 = 'A0'
-    EMG_2 = 'A1'
+    EMG_2 = 'A2'
 

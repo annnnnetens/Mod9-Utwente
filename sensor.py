@@ -1,4 +1,4 @@
-from biorobotics import AnalogIn, Encoder
+from biorobotics import AnalogIn, Encoder, SerialPC
 from pins import Pins
 from blueswitch import Blueswitch
 from biquad_filter import Biquad
@@ -36,7 +36,9 @@ class SensorState:
         self.potmeter2 = AnalogIn(Pins.POTMETER_2)
         self.blueswitch = Blueswitch()
 
-    def update(self, USE_POTMETERS=True):
+        self.pc = SerialPC(4)
+
+    def update(self, USE_POTMETERS):
         
         self.switch_value = self.blueswitch.value()
         # print("encoder 1 is " + str(self.pins_encoder_1.counter() - self.encoder_def_1))
@@ -53,10 +55,13 @@ class SensorState:
             self.emg1_f = (self.emg1_value - 0.5) * 2
             self.emg2_f = (self.emg2_value - 0.5) * 2
         else:
-            # TODO: the values need to be adjusted to be in range of [0, 1] or something
 
             self.emg1_value = self.emg1.read()
             self.emg2_value = self.emg2.read()
+
+            # self.pc.set(0, self.emg1_value)
+            # self.pc.set(1, self.emg2_value)
+
 
             tf_1 = self.highpassfilt_1.filter(self.emg1_value)
             tf_2 = self.highpassfilt_2.filter(self.emg2_value)
@@ -69,5 +74,10 @@ class SensorState:
 
             self.emg1_f = self.lowpassfilt_1.filter(tf_1) * self.gain_2
             self.emg2_f = self.lowpassfilt_2.filter(tf_2) * self.gain_2
+
+            # self.pc.set(2, self.emg1_f)
+            # self.pc.set(3, self.emg2_f)
+
+            # self.pc.send()
 
 
