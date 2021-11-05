@@ -75,10 +75,11 @@ def matinv2x2(M):
     res[0, 0] = M[1, 1]/det
     res[1, 1] = M[0, 0]/det
     res[1, 0] = - M[1, 0]/det
+    res[0, 1] = - M[0, 1]/det
     return res
 
 
-def calculate_dq_j_inv(q1, q2, vx, vy):
+def calculate_dq_j_inv(q1, q2, x_des, y_des):
     L3 = 0.028
     reference_configuration = np.array([
         [1, 0, L3],
@@ -91,11 +92,17 @@ def calculate_dq_j_inv(q1, q2, vx, vy):
     J = jacobian_angles(q1)
 
     pe0 = He0[:2, 2]
+
+
     if on_microcontroller:
+        vx = x_des - pe0[0][0]
+        vy = y_des - pe0[1][0]
         H_0_f = np.array([[1, 0, -pe0[0][0]],
                           [0, 1, -pe0[1][0]],
                           [0, 0, 1]])
     else:
+        vx = x_des - pe0[0][0]
+        vy = y_des - pe0[1][0]
         H_0_f = np.array([[1, 0, -pe0[0]],
                         [0, 1, -pe0[1]],
                         [0, 0, 1]])

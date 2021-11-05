@@ -48,9 +48,8 @@ class SensorState:
         if USE_POTMETERS:
             self.emg1_value = self.potmeter1.read()
             self.emg2_value = self.potmeter2.read()
-            self.emg1_f = self.emg1_value
-            self.emg2_f = self.emg2_value
-
+            self.emg1_f = (self.emg1_value - 0.5) * 2
+            self.emg2_f = (self.emg2_value - 0.5) * 2
         else:
             # TODO: the values need to be adjusted to be in range of [0, 1] or something
 
