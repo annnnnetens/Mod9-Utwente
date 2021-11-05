@@ -79,18 +79,17 @@ def matinv2x2(M):
     return res
 
 
-def endpoint(angle1, angle2): #TODO: this is incorrect! the endpoint is not at the end of the arm exactly
-    # it has an extra angle!
-    ex = -0.185 * math.sin((angle1 + angle2) * pi) - 0.24 * math.sin(angle1 * pi)
-    ey = 0.185 * math.cos((angle1 + angle2) * pi) + 0.24 * math.cos(angle1 * pi)
+def endpoint(angle1, angle2): #this takes into account that the endpoint is offset from the arm
+    ex = 0.1871 * math.sin((angle1 + angle2 - 0.04777) * pi) + 0.24 * math.sin(angle1 * pi)
+    ey = -0.1871 * math.cos((angle1 + angle2 - 0.04777) * pi) - 0.24 * math.cos(angle1 * pi)
     return ex, ey
 
 
 def calculate_dq_j_inv(q1, q2, vx, vy):
     L3 = 0.028
     reference_configuration = np.array([
-        [1, 0, L3],
-        [0, 1, 0.425],
+        [1, 0, -L3],
+        [0, 1, -0.425],
         [0, 0, 1]
     ])
     reference_twist1 = unit_twist_rotational(0, 0)

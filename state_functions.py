@@ -139,8 +139,8 @@ class StateFunctions:
             voltage_2 = 0
             print("Joint 2 has reached it's bounds. Stopping the motor")
         self.motor_joint_base.write(voltage_1)
-        # dq2_factor = dq[1][0]
-        self.motor_joint_arm.write(voltage_2)
+        # the motor in the arm is located reverse to the first one!
+        self.motor_joint_arm.write(-voltage_2)
         print("Current velocity, angles and voltages")
         print(transformed_signal_1, transformed_signal_2)
         print(self.q1, self.q2)
