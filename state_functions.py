@@ -2,7 +2,6 @@ from states import State
 from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
-from biquad_filter import Biquad
 from rki import calculate_dq_j_inv
 from controller import Controller
 from math import sqrt
@@ -110,9 +109,9 @@ class StateFunctions:
             EMG_signal_2 = self.sensor_state.emg2_value
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5)
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
-        if abs(transformed_signal_1) < 0.15:
+        if abs(transformed_signal_1) < 0.2: # 0.2 for anete for 5Hz cutoff, was 0.015
             transformed_signal_1 = 0
-        if abs(transformed_signal_2) < 0.15:
+        if abs(transformed_signal_2) < 0.2:
             transformed_signal_2 = 0
         # checks for EMG values larger than one and resets them to one. Could be also a bit lower than 1, to saturate
         if abs(transformed_signal_1) > 1:

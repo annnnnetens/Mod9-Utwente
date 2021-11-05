@@ -14,7 +14,7 @@ class SensorState:
         self.switch_value = 0
         self.encoder_def_1 = 0
         self.encoder_def_2 = 0
-        
+
         # define encoders for motors 1 and 2
         self.pins_encoder_1 = Encoder(Pins.Encoder_1_A, Pins.Encoder_1_B)
         self.pins_encoder_2 = Encoder(Pins.Encoder_2_A, Pins.Encoder_2_B)
@@ -39,6 +39,8 @@ class SensorState:
     def update(self, USE_POTMETERS=True):
         
         self.switch_value = self.blueswitch.value()
+        # print("encoder 1 is " + str(self.pins_encoder_1.counter() - self.encoder_def_1))
+        # print("encoder 2 is " + str(self.pins_encoder_2.counter() - self.encoder_def_2))
         self.motor1_sensor = self.pins_encoder_1.counter() - self.encoder_def_1
         self.motor2_sensor = self.pins_encoder_2.counter() - self.encoder_def_2
 
@@ -58,7 +60,7 @@ class SensorState:
 
             tf_1 = self.highpassfilt_1.filter(self.emg1_value)
             tf_2 = self.highpassfilt_2.filter(self.emg2_value)
-            
+
             tf_1 = self.gain_1 * self.bandstopfilt_1.filter(tf_1)
             tf_2 = self.gain_1 * self.bandstopfilt_2.filter(tf_2)
             

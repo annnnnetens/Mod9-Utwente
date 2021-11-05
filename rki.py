@@ -1,6 +1,5 @@
 import math
 # When working on the microcontroller change the numpy to ulab since numpy is not available on the microcontroller
-
 try:
     import numpy as np
     on_microcontroller = False
@@ -80,6 +79,12 @@ def matinv2x2(M):
     return res
 
 
+def endpoint(angle1, angle2): #this takes into account that the endpoint is offset from the arm
+    ex = 0.1871 * math.sin((angle1 + angle2 - 0.04777) * pi) + 0.24 * math.sin(angle1 * pi)
+    ey = -0.1871 * math.cos((angle1 + angle2 - 0.04777) * pi) - 0.24 * math.cos(angle1 * pi)
+    return ex, ey
+
+
 def calculate_dq_j_inv(q1, q2, x_des, y_des):
     L3 = 0.028
     reference_configuration = np.array([
@@ -93,8 +98,6 @@ def calculate_dq_j_inv(q1, q2, x_des, y_des):
     J = jacobian_angles(q1)
 
     pe0 = He0[:2, 2]
-
-
     if on_microcontroller:
         vx = x_des - pe0[0][0]
         vy = y_des - pe0[1][0]
@@ -183,3 +186,9 @@ if __name__ == "__main__":
 
         plt.show()
 
+        q1 = 45
+        q2 = 0
+        [xnorm,ynorm] = endpoint(1.5/180/13.5*5 + q1/180, 0.6/180/13.5*5 + q2/180)
+        [xdev, ydev] = endpoint(q1/180, q2/180)
+        leng = np.sqrt((xnorm-xdev)**2 + (ynorm-ydev)**2)
+        print(xnorm, ynorm, xdev, ydev, leng)
