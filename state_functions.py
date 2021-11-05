@@ -119,6 +119,7 @@ class StateFunctions:
         if abs(transformed_signal_2) > 1:
             transformed_signal_2 = transformed_signal_2 / abs(transformed_signal_2)
 
+        # TODO: what does this do and does it need to be uncommented
         # the diagonal values are larger! Need to normalize and only allow :
         # value_speed = sqrt((transformed_signal_1 ** 2 + transformed_signal_2 ** 2)/2)
         # transformed_signal_1 = transformed_signal_1 * self.max_speed / value_speed
