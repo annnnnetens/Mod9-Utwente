@@ -85,11 +85,11 @@ def endpoint(angle1, angle2): #this takes into account that the endpoint is offs
     return ex, ey
 
 
-def calculate_dq_j_inv(q1, q2, vx, vy):
+def calculate_dq_j_inv(q1, q2, x_des, y_des):
     L3 = 0.028
     reference_configuration = np.array([
-        [1, 0, -L3],
-        [0, 1, -0.425],
+        [1, 0, L3],
+        [0, 1, 0.425],
         [0, 0, 1]
     ])
     reference_twist1 = unit_twist_rotational(0, 0)
@@ -99,10 +99,14 @@ def calculate_dq_j_inv(q1, q2, vx, vy):
 
     pe0 = He0[:2, 2]
     if on_microcontroller:
+        vx = x_des - pe0[0][0]
+        vy = y_des - pe0[1][0]
         H_0_f = np.array([[1, 0, -pe0[0][0]],
                           [0, 1, -pe0[1][0]],
                           [0, 0, 1]])
     else:
+        vx = x_des - pe0[0]
+        vy = y_des - pe0[1]
         H_0_f = np.array([[1, 0, -pe0[0]],
                         [0, 1, -pe0[1]],
                         [0, 0, 1]])
@@ -142,11 +146,11 @@ if __name__ == "__main__":
 
         plt.figure()
 
-        angle1 = 0.25
-        angle2 = 0.3
+        angle1 = 0
+        angle2 = 0
         timestep = 0.01
-        vx = -1
-        vy = 0
+        vx = 0.5
+        vy = -1
 
         H5 = brockett(H4, [(T1, angle1), (T2, angle2)])
         print(H5)
@@ -154,16 +158,34 @@ if __name__ == "__main__":
         y = [0, 0.24 * math.cos(angle1 * pi), 0.185 * math.cos((angle1 + angle2) * pi) + 0.24 * math.cos(angle1 * pi)]
         plt.plot(x, y, 'r+', markersize=10)
 
-        [dq1, dq2] = calculate_dq_j_inv(angle1, angle2, vx, vy)
-        a1_i = angle1 + timestep * dq1
-        a2_i = angle2 + timestep * dq2
+        des_x = x[2] + vx * timestep
+        des_y = y[2] + vy * timestep
 
-        xx = [0, -0.24 * math.sin(a1_i * pi), -0.185 * math.sin((a1_i + a2_i) * pi) - 0.24 * math.sin(a1_i * pi)]
-        yy = [0, 0.24 * math.cos(a1_i * pi), 0.185 * math.cos((a1_i + a2_i) * pi) + 0.24 * math.cos(a1_i * pi)]
 
-        plt.plot(xx, yy, 'bo')
+        for i in range(100):
+
+            [dq1, dq2] = calculate_dq_j_inv(angle1, angle2, des_x, des_y)
+            angle1 = angle1 + timestep * dq1
+            angle2 = angle2 + timestep * dq2
+
+            # xx = [0, -0.24 * math.sin(angle1 * pi), -0.185 * math.sin((angle1 + angle2) * pi) - 0.24 * math.sin(angle1 * pi)]
+            # yy = [0, 0.24 * math.cos(angle1 * pi), 0.185 * math.cos((angle1 + angle2) * pi) + 0.24 * math.cos(angle1 * pi)]
+            #
+            # plt.plot(xx, yy)
+
+            xx = [-0.185 * math.sin((angle1 + angle2) * pi) - 0.24 * math.sin(angle1 * pi)]
+            yy = [0.185 * math.cos((angle1 + angle2) * pi) + 0.24 * math.cos(angle1 * pi)]
+
+            plt.scatter(xx, yy)
+
+            des_x = des_x + vx * timestep
+            des_y = des_y + vy * timestep
+
+        plt.xticks([-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        plt.yticks([-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5])
+
         plt.show()
-        
+
         q1 = 45
         q2 = 0
         [xnorm,ynorm] = endpoint(1.5/180/13.5*5 + q1/180, 0.6/180/13.5*5 + q2/180)

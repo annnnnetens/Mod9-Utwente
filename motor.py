@@ -5,7 +5,7 @@ from machine import Pin
 class Motor:
     def __init__(self, motordir, motorpwm, frequency):
         self.pwm_dir = Pin(motordir, Pin.OUT)
-        self.pwm_vel = PWM(motorpwm, frequency)
+        self.pwm_vel = PWM(motorpwm, 12000)
         return
 
     def write(self, value):

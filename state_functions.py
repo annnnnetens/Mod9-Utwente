@@ -1,4 +1,3 @@
-# from numpy.core.fromnumeric import size
 from states import State
 from motor import Motor
 from pins import Pins
@@ -6,6 +5,10 @@ from biorobotics import PWM, SerialPC
 from rki import calculate_dq_j_inv
 from controller import Controller
 from math import sqrt
+try:
+    import numpy as np
+except ImportError:
+    import ulab as np
 
 
 # The statefunctions class can be extended by having the servo motor hold in a certain position.
@@ -40,9 +43,9 @@ class StateFunctions:
         self.servo_motor_value = 1
         self.q1 = 0
         self.q2 = 0
-        self.toggle_count = 0
-        self.dq1_controller = Controller(self.frequency, kp=0.01, kd=1, ki=1)
-        self.dq2_controller = Controller(self.frequency, kp=0.01, kd=1)
+        self.desired_position = [0.028, 0.425]
+        self.controller_dq1 = Controller(kp=3, ki=0.01)
+        self.controller_dq2 = Controller(kp=1, ki=0.01)
         return
 
     def calibrating(self):
@@ -85,9 +88,9 @@ class StateFunctions:
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
 
-        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2 # now there are 2 q1 in one rotation
-        self.q2 = self.sensor_state.motor2_sensor / 131.25 / 64 * 2 # q1 and q2 are therefore in radians*pi
-        if not self.USE_PM: # if use EMG
+        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2  # now there are 2 q1 in one rotation
+        self.q2 = - self.sensor_state.motor2_sensor / 131.25 / 64 * 2  # q1 and q2 are therefore in radians*pi
+        if not self.USE_PM:
 
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
@@ -113,36 +116,35 @@ class StateFunctions:
             transformed_signal_1 = transformed_signal_1/abs(transformed_signal_1)
         if abs(transformed_signal_2) > 0.9:
             transformed_signal_2 = transformed_signal_2/abs(transformed_signal_2)
-        
 
+
+        # TODO: what does this do and does it need to be uncommented
         # the diagonal values are larger! Need to normalize and only allow :
-        # value_speed = sqrt(transformed_signal_1**2 + transformed_signal_2 ** 2)
-        transformed_signal_1 = transformed_signal_1 * self.max_speed
-        transformed_signal_2 = transformed_signal_2 * self.max_speed
+        # value_speed = sqrt((transformed_signal_1 ** 2 + transformed_signal_2 ** 2)/2)
+        # transformed_signal_1 = transformed_signal_1 * self.max_speed / value_speed
+        # transformed_signal_2 = transformed_signal_2 * self.max_speed / value_speed
+        speed_constant = 0.02
+        self.desired_position = [self.desired_position[0] + speed_constant * transformed_signal_1 / self.frequency,
+                                 self.desired_position[1] + speed_constant * transformed_signal_2 / self.frequency]
 
-        dq = calculate_dq_j_inv(self.q1, self.q2, transformed_signal_1, transformed_signal_2)
+        dq = calculate_dq_j_inv(self.q1, self.q2, self.desired_position[0], self.desired_position[1])
 
-
-        q1_error = dq[0][0] / self.frequency # (reference angle - current angle)*delta t
-        q2_error = dq[1][0] / self.frequency
-        
-        self.pc.set(2, q1_error)
-        self.pc.set(3, q2_error)
+        self.pc.set(2, dq[0][0])
+        self.pc.set(3, dq[1][0])
         self.pc.send()
 
-        voltage_1 = self.dq1_controller.transfer(q1_error)
-        voltage_2 = self.dq2_controller.transfer(q2_error)
-
-        # TODO: add checks for joints to not exceed physical boundaries and integrate dq instead of transformed signal
-        if (self.q1 >= 0.5 and voltage_1 > 0) or (self.q1 <= -0.5 and voltage_2 < 0):
-            voltage_1 = 0
+        # TODO: check for physical bounds
+        if (self.q1 >= 0.5 and transformed_signal_1 > 0.5) or (self.q1 <= -0.5 and transformed_signal_1 < -0.5):
+            transformed_signal_1 = 0.5 * transformed_signal_1 / abs(transformed_signal_1)
             print("Joint 1 has reached it's bounds. Stopping the motor")
-        if (self.q2 >= 12.5 / 18 and voltage_2 > 0) or (self.q2 <= -12.5 / 18 and voltage_2 > 0):
-            voltage_2 = 0
+        if (self.q2 >= 12.5 / 18 and transformed_signal_2 > 12.5/18) or (self.q2 <= -12.5 / 18 and transformed_signal_2 < -12.5/18):
+            transformed_signal_2 = 12.5/18 * transformed_signal_2 / abs(transformed_signal_2)
             print("Joint 2 has reached it's bounds. Stopping the motor")
-        self.motor_joint_base.write(voltage_1)
-        # the motor in the arm is located reverse to the first one!
-        self.motor_joint_arm.write(-voltage_2)
+        voltage1 = -self.controller_dq1.control(dq[0][0])
+        voltage2 = -self.controller_dq2.control(dq[1][0])
+        self.motor_joint_base.write(voltage1)
+        self.motor_joint_arm.write(voltage2)
+
         self.write_servo_motor()
         self.listen_for_signal()
 
