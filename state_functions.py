@@ -89,8 +89,6 @@ class StateFunctions:
         # TODO: state action: calculate using inverse kinematics what the joint rotation should be in order to move the end effector
         # TODO: use the joint rotation results and send that to the motor
 
-        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2  # now there are 2 q1 in one rotation
-        self.q2 = - self.sensor_state.motor2_sensor / 131.25 / 64 * 2  # q1 and q2 are therefore in radians*pi
         if not self.USE_PM:
 
             EMG_signal_1 = self.sensor_state.emg1_f
@@ -134,19 +132,19 @@ class StateFunctions:
         dq = calculate_dq_j_inv(self.q1, self.q2, self.desired_position[0], self.desired_position[1])
        
 
-        self.pc.set(2, dq[0][0])
-        self.pc.set(3, dq[1][0])
-        self.pc.send()
-
-        # TODO: check for physical bounds
-        if (self.q1 >= 0.5 and transformed_signal_1 > 0.5) or (self.q1 <= -0.5 and transformed_signal_1 < -0.5):
-            transformed_signal_1 = 0.5 * transformed_signal_1 / abs(transformed_signal_1)
-            print("Joint 1 has reached it's bounds. Stopping the motor")
-        if (self.q2 >= 12.5 / 18 and transformed_signal_2 > 12.5/18) or (self.q2 <= -12.5 / 18 and transformed_signal_2 < -12.5/18):
-            transformed_signal_2 = 12.5/18 * transformed_signal_2 / abs(transformed_signal_2)
-            print("Joint 2 has reached it's bounds. Stopping the motor")
         voltage1 = -self.controller_dq1.control(dq[0][0])
         voltage2 = -self.controller_dq2.control(dq[1][0])
+
+
+
+
+        if (self.q1 >= 0.5 and voltage1 < 0) or (self.q1 <= -0.5 and voltage1 > 0):
+            voltage1 = 0
+            print("Joint 1 has reached it's bounds. Stopping the motor")
+        if (self.q2 >= 12.5 / 18 and voltage2 < 0) or (self.q2 <= -12.5 / 18 and voltage2 > 0):
+            voltage2 = 0
+            print("Joint 2 has reached it's bounds. Stopping the motor")
+
         self.motor_joint_base.write(voltage1)
         self.motor_joint_arm.write(voltage2)
 
@@ -164,16 +162,22 @@ class StateFunctions:
         If no signal then set the state to standby
         """
 
+        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2  # now there are 2 q1 in one rotation
+        self.q2 = - self.sensor_state.motor2_sensor / 131.25 / 64 * 2  # q1 and q2 are therefore in radians*pi
+
         switch_val = self.sensor_state.switch_value
         EMG_signal_1 = self.sensor_state.emg1_f
         EMG_signal_2 = self.sensor_state.emg2_f
+        ex, ey = endpoint(self.q1, self.q2)
+        error = sqrt(abs(ex - self.desired_position[0])**2 + abs(ey - self.desired_position[1])**2)
+        large_error = error > 0.02
 
         # print("signal 1 is " + str(EMG_signal_1) + "signal 2 is " + str(EMG_signal_2) + " and blueswitch is " + str(switch_val))
         if switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
             print("going to toggling")
         # Just using stub values here. Feel free to change
-        elif abs(EMG_signal_1) > 0.05 or abs(EMG_signal_2)>0.05:
+        elif abs(EMG_signal_1) > 0.15 or abs(EMG_signal_2) > 0.15 or large_error:
             self.robot_state.set(State.MOVING)
             if self.robot_state.is_changed():
                 print("going to moving")
