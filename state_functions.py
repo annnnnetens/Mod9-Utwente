@@ -43,8 +43,7 @@ class StateFunctions:
         self.servo_motor_value = 1
         self.q1 = 0
         self.q2 = 0
-        self.desired_position = [-0.028, -0.425]
-        self.prev_desired_position = [-0.028, -0.425]
+        self.desired_position = [0.028, 0.425]
         self.controller_dq1 = Controller(kp=3, ki=0.01)
         self.controller_dq2 = Controller(kp=1, ki=0.01)
         return
@@ -123,13 +122,14 @@ class StateFunctions:
         # transformed_signal_1 = transformed_signal_1 * self.max_speed / value_speed
         # transformed_signal_2 = transformed_signal_2 * self.max_speed / value_speed
         speed_constant = self.max_speed
-        self.desired_position = [self.desired_position[0] + speed_constant * transformed_signal_1 / self.frequency,
+        desired_position = [self.desired_position[0] + speed_constant * transformed_signal_1 / self.frequency,
                                  self.desired_position[1] + speed_constant * transformed_signal_2 / self.frequency]
         print("desired pos and current pos")
-        print(self.desired_position)
+        print(desired_position)
         print(endpoint(self.q1, self.q2))
         
-        dq = calculate_dq_j_inv(self.q1, self.q2, self.desired_position[0], self.desired_position[1])
+        dq = calculate_dq_j_inv(self.q1, self.q2, desired_position[0], desired_position[1])
+
        
 
         voltage1 = -self.controller_dq1.control(dq[0][0])
@@ -140,10 +140,17 @@ class StateFunctions:
 
         if (self.q1 >= 0.5 and voltage1 < 0) or (self.q1 <= -0.5 and voltage1 > 0):
             voltage1 = 0
+            dq[0][0] = 0
             print("Joint 1 has reached it's bounds. Stopping the motor")
         if (self.q2 >= 12.5 / 18 and voltage2 < 0) or (self.q2 <= -12.5 / 18 and voltage2 > 0):
             voltage2 = 0
+            dq[1][0] = 0
             print("Joint 2 has reached it's bounds. Stopping the motor")
+
+        tracked_angles = [self.q1 + dq[0][0]/self.frequency, self.q2 + dq[1][0]/self.frequency]
+        [endpoint_x, endpoint_y] = endpoint(tracked_angles[0], tracked_angles[1])
+        self.desired_position = [endpoint_x, endpoint_y]
+        
 
         self.motor_joint_base.write(voltage1)
         self.motor_joint_arm.write(voltage2)

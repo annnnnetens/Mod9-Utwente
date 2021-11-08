@@ -92,7 +92,7 @@ def calculate_dq_j_inv(q1, q2, x_des, y_des):
         [0, 0, 1]
     ])
     reference_twist1 = unit_twist_rotational(0, 0)
-    reference_twist2 = unit_twist_rotational(0, -0.24)
+    reference_twist2 = unit_twist_rotational(0, 0.24)
     He0 = brockett(reference_configuration, [(reference_twist1, q1), (reference_twist2, q2)])
     J = jacobian_angles(q1)
 
