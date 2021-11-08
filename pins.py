@@ -16,4 +16,6 @@ class Pins:
     SERIAL_PC = 4 # only for graphing the EMG, not needed in the end
     EMG_1 = 'A0'
     EMG_2 = 'A2'
+    BUTTON_1 = 'D9'
+    LED_1 = 'D8'
 

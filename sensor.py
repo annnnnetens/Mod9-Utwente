@@ -1,3 +1,4 @@
+import shieldswitch
 from biorobotics import AnalogIn, Encoder, SerialPC
 from pins import Pins
 from blueswitch import Blueswitch
@@ -14,6 +15,7 @@ class SensorState:
         self.switch_value = 0
         self.encoder_def_1 = 0
         self.encoder_def_2 = 0
+        self.button1_value = 0
 
         # define encoders for motors 1 and 2
         self.pins_encoder_1 = Encoder(Pins.Encoder_1_A, Pins.Encoder_1_B)
@@ -36,6 +38,7 @@ class SensorState:
         self.potmeter2 = AnalogIn(Pins.POTMETER_2)
         self.blueswitch = Blueswitch()
 
+        self.button1 = shieldswitch.Shieldswitch(Pins.BUTTON_1)
         self.pc = SerialPC(4)
 
     def update(self, USE_POTMETERS):
@@ -45,6 +48,7 @@ class SensorState:
         # print("encoder 2 is " + str(self.pins_encoder_2.counter() - self.encoder_def_2))
         self.motor1_sensor = self.pins_encoder_1.counter() - self.encoder_def_1
         self.motor2_sensor = self.pins_encoder_2.counter() - self.encoder_def_2
+        self.button1_value = self.button1.value()
 
             # TODO: read sensor values and update them.
             # TODO: add encoder to this.
