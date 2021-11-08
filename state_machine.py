@@ -17,7 +17,7 @@ class StateMachine:
         # listlowpass = [-0.7478, 0.2722, 0.1311, 0.2622, 0.1311]
         # 48-52 band stop Butterworth - for EMG
         listbandstop = [-0.960616192564186621716260106040863320231,  0.919547137907040124105151335243135690689, 1.0, -1.000877940003687793790732030174694955349, 1.0]
-        gainbandstop = 1/0.07 # this is the max value of EMG for Anete
+        gainbandstop = 1/0.045 # this is the max value of EMG for Anete
 
         # listhighpass = [-1.889, 0.8949, 0.9460, -1.8920, 0.9460] # with 1000hz
         listhighpass = [-1.9704, 0.9708, 0.9853, -1.9706, 0.9853] # with 300hz at 1 Hz cutoff
@@ -36,9 +36,8 @@ class StateMachine:
         self.ticker.start()
 
     def run(self):
-        self.sensor_state.update(self.USE_POTMETERS) # TODO: add False to measure EMGs and not potmeters
+        self.sensor_state.update(self.USE_POTMETERS) 
         self.state_functions.callbacks[self.robot_state.current]()
-        # can use self.sensor_state.send_to_pc()
 
     def stop(self):
         self.ticker.stop()

@@ -94,15 +94,12 @@ class StateFunctions:
 
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
-            transformed_signal_1 = 2 * (EMG_signal_1 - 0.5)
-            transformed_signal_2 = 2 * (EMG_signal_2 - 0.5)
+            transformed_signal_1 = 2 * (EMG_signal_1 - 0.55)
+            transformed_signal_2 = 2 * (EMG_signal_2 - 0.55)
 
             # printing the emgs as graphs in uscope
-            self.pc.set(0, self.sensor_state.emg1_value)
-            self.pc.set(1, EMG_signal_1)
-            self.pc.set(2, self.sensor_state.emg2_value)
-            self.pc.set(3, EMG_signal_2)
-            self.pc.send()
+
+
 
         else:
             EMG_signal_1 = self.sensor_state.emg1_value
@@ -114,10 +111,11 @@ class StateFunctions:
         if abs(transformed_signal_2) < 0.2:
             transformed_signal_2 = 0
         # checks for EMG values larger than one and resets them to one. Could be also a bit lower than 1, to saturate
-        if abs(transformed_signal_1) > 1:
-            transformed_signal_1 = transformed_signal_1 / abs(transformed_signal_1)
-        if abs(transformed_signal_2) > 1:
-            transformed_signal_2 = transformed_signal_2 / abs(transformed_signal_2)
+        if abs(transformed_signal_1) > 0.9:
+            transformed_signal_1 = transformed_signal_1/abs(transformed_signal_1)
+        if abs(transformed_signal_2) > 0.9:
+            transformed_signal_2 = transformed_signal_2/abs(transformed_signal_2)
+
 
         # TODO: what does this do and does it need to be uncommented
         # the diagonal values are larger! Need to normalize and only allow :
@@ -164,7 +162,7 @@ class StateFunctions:
             self.robot_state.set(State.TOGGLING)
             print("going to toggling")
         # Just using stub values here. Feel free to change
-        elif abs(EMG_signal_1) > 0.1 or abs(EMG_signal_2) > 0.1:
+        elif abs(EMG_signal_1) > 0.05 or abs(EMG_signal_2)>0.05:
             self.robot_state.set(State.MOVING)
             if self.robot_state.is_changed():
                 print("going to moving")
