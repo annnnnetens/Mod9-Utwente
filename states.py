@@ -3,6 +3,7 @@ class State:
     STAND_BY = 'standby'
     TOGGLING = 'toggling'
     MOVING = 'moving'
+    DEMO = 'demo'
 
     def __init__(self):
         self.previous = None

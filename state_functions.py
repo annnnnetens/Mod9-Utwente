@@ -24,7 +24,8 @@ class StateFunctions:
             State.CALIBRATING: self.calibrating,
             State.STAND_BY: self.standby,
             State.TOGGLING: self.toggling,
-            State.MOVING: self.moving
+            State.MOVING: self.moving,
+            State.DEMO: self.demo
         }
         self.motor_joint_base = Motor(Pins.MOTOR_1_DIRECTION, Pins.MOTOR_1_PWN, ticker_frequency)
         self.motor_joint_arm = Motor(Pins.MOTOR_2_DIRECTION, Pins.MOTOR_2_PWM, ticker_frequency)
@@ -43,6 +44,8 @@ class StateFunctions:
         self.servo_motor_value = 1
         self.q1 = 0
         self.q2 = 0
+        self.demo_state_status = 0
+        self.demo_count = 0
         self.desired_position = [0.028, 0.425]
         self.controller_dq1 = Controller(kp=3, ki=0.01)
         self.controller_dq2 = Controller(kp=1, ki=0.01)
@@ -144,6 +147,49 @@ class StateFunctions:
         self.write_servo_motor()
         self.listen_for_signal()
 
+    def demo(self):
+        self.update_angles()
+
+        if self.robot_state.is_changed():
+            self.demo_state_status = 0
+            self.robot_state.set(self.robot_state.current)
+            self.demo_counter = 0
+            print("Entered demo state")
+
+
+        # Move down, then right, then up and then down
+        vx = 0
+        vy = 0
+        if self.demo_state_status == 0:
+            vy = -1
+        elif self.demo_state_status == 1:
+            vy = -1
+        elif self.demo_state_status == 2:
+            vx = 1
+        elif self.demo_state_status == 3:
+            vy = 1
+        elif self.demo_state_status == 4:
+            vx = -1
+        speed_constant = 0.02
+        print("desired positon is " + str(self.desired_position[0]) + " " + str(self.desired_position[1]))
+        self.desired_position = [self.desired_position[0] + speed_constant * vx / self.frequency,
+                                 self.desired_position[1] + speed_constant * vy / self.frequency]
+
+        dq = calculate_dq_j_inv(self.q1, self.q2, self.desired_position[0], self.desired_position[1])
+
+        voltage1 = -self.controller_dq1.control(dq[0][0])
+        voltage2 = -self.controller_dq2.control(dq[1][0])
+        self.motor_joint_base.write(voltage1)
+        self.motor_joint_arm.write(voltage2)
+
+        self.demo_counter += 1
+        if self.demo_counter > self.frequency*2.5:
+            self.demo_state_status += 1
+            self.demo_counter = 0
+
+        if self.demo_state_status == 5:
+            self.robot_state.set(State.STAND_BY)
+
     def listen_for_signal(self):
         """
         It seems that in the states standby, lifting, lowering and moving you can move to any of the other states.
@@ -155,8 +201,7 @@ class StateFunctions:
         If no signal then set the state to standby
         """
 
-        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2  # now there are 2 q1 in one rotation
-        self.q2 = - self.sensor_state.motor2_sensor / 131.25 / 64 * 2  # q1 and q2 are therefore in radians*pi
+        self.update_angles()
 
         switch_val = self.sensor_state.switch_value
         EMG_signal_1 = self.sensor_state.emg1_f
@@ -165,8 +210,11 @@ class StateFunctions:
         error = sqrt(abs(ex - self.desired_position[0])**2 + abs(ey - self.desired_position[1])**2)
         large_error = error > 0.02
 
+        if self.sensor_state.button1_value == 1:
+            self.robot_state.set(State.DEMO)
+
         # print("signal 1 is " + str(EMG_signal_1) + "signal 2 is " + str(EMG_signal_2) + " and blueswitch is " + str(switch_val))
-        if switch_val == 1 and self.robot_state.current != State.TOGGLING:
+        elif switch_val == 1 and self.robot_state.current != State.TOGGLING:
             self.robot_state.set(State.TOGGLING)
             print("going to toggling")
         # Just using stub values here. Feel free to change
@@ -185,3 +233,7 @@ class StateFunctions:
     def stop_motor(self):
         self.motor_joint_arm.write(0)
         self.motor_joint_base.write(0)
+
+    def update_angles(self):
+        self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2  # now there are 2 q1 in one rotation
+        self.q2 = - self.sensor_state.motor2_sensor / 131.25 / 64 * 2  # q1 and q2 are therefore in radians*pi
