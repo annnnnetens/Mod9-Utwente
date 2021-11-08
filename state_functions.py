@@ -2,7 +2,7 @@ from states import State
 from motor import Motor
 from pins import Pins
 from biorobotics import PWM, SerialPC
-from rki import calculate_dq_j_inv
+from rki import calculate_dq_j_inv, endpoint
 from controller import Controller
 from math import sqrt
 try:
@@ -43,7 +43,8 @@ class StateFunctions:
         self.servo_motor_value = 1
         self.q1 = 0
         self.q2 = 0
-        self.desired_position = [0.028, 0.425]
+        self.desired_position = [-0.028, -0.425]
+        self.prev_desired_position = [-0.028, -0.425]
         self.controller_dq1 = Controller(kp=3, ki=0.01)
         self.controller_dq2 = Controller(kp=1, ki=0.01)
         return
@@ -104,8 +105,6 @@ class StateFunctions:
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5) 
 
-        self.pc.set(0, transformed_signal_1)
-        self.pc.set(1, transformed_signal_2)
 
         if abs(transformed_signal_1) < 0.2: # 0.2 for anete for 5Hz cutoff, was 0.015
             transformed_signal_1 = 0
@@ -117,17 +116,23 @@ class StateFunctions:
         if abs(transformed_signal_2) > 0.9:
             transformed_signal_2 = transformed_signal_2/abs(transformed_signal_2)
 
+        self.pc.set(0, transformed_signal_1)
+        self.pc.set(1, transformed_signal_2)
 
         # TODO: what does this do and does it need to be uncommented
         # the diagonal values are larger! Need to normalize and only allow :
         # value_speed = sqrt((transformed_signal_1 ** 2 + transformed_signal_2 ** 2)/2)
         # transformed_signal_1 = transformed_signal_1 * self.max_speed / value_speed
         # transformed_signal_2 = transformed_signal_2 * self.max_speed / value_speed
-        speed_constant = 0.02
+        speed_constant = self.max_speed
         self.desired_position = [self.desired_position[0] + speed_constant * transformed_signal_1 / self.frequency,
                                  self.desired_position[1] + speed_constant * transformed_signal_2 / self.frequency]
-
+        print("desired pos and current pos")
+        print(self.desired_position)
+        print(endpoint(self.q1, self.q2))
+        
         dq = calculate_dq_j_inv(self.q1, self.q2, self.desired_position[0], self.desired_position[1])
+       
 
         self.pc.set(2, dq[0][0])
         self.pc.set(3, dq[1][0])
