@@ -60,8 +60,8 @@ def jacobian_angles(q1):
     Currently only uses radians"""
     J = np.zeros((3, 2))
     J[0] = np.array([1, 1])
-    J[1] = np.array([0, 0.24 * math.cos(q1 * pi)])
-    J[2] = np.array([0, 0.24 * math.sin(q1 * pi)])
+    J[1] = np.array([0, -0.24 * math.cos(q1 * pi)])
+    J[2] = np.array([0, -0.24 * math.sin(q1 * pi)])
     return J
 
 
@@ -88,8 +88,8 @@ def endpoint(angle1, angle2): #this takes into account that the endpoint is offs
 def calculate_dq_j_inv(q1, q2, x_des, y_des):
     L3 = 0.028
     reference_configuration = np.array([
-        [1, 0, L3],
-        [0, 1, 0.425],
+        [1, 0, -L3],
+        [0, 1, -0.425],
         [0, 0, 1]
     ])
     reference_twist1 = unit_twist_rotational(0, 0)
