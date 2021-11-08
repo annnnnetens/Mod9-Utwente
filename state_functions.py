@@ -87,15 +87,12 @@ class StateFunctions:
 
         self.q1 = self.sensor_state.motor1_sensor / 131.25 / 64 * 2 # now there are 2 q1 in one rotation
         self.q2 = self.sensor_state.motor2_sensor / 131.25 / 64 * 2 # q1 and q2 are therefore in radians*pi
-        if not self.USE_PM:
+        if not self.USE_PM: # if use EMG
 
             EMG_signal_1 = self.sensor_state.emg1_f
             EMG_signal_2 = self.sensor_state.emg2_f
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.55)
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.55)
-
-            # printing the emgs as graphs in uscope
-
 
 
         else:
@@ -103,6 +100,9 @@ class StateFunctions:
             EMG_signal_2 = self.sensor_state.emg2_value
             transformed_signal_1 = 2 * (EMG_signal_1 - 0.5) 
             transformed_signal_2 = 2 * (EMG_signal_2 - 0.5) 
+
+        self.pc.set(0, transformed_signal_1)
+        self.pc.set(1, transformed_signal_2)
 
         if abs(transformed_signal_1) < 0.2: # 0.2 for anete for 5Hz cutoff, was 0.015
             transformed_signal_1 = 0
@@ -117,8 +117,8 @@ class StateFunctions:
 
         # the diagonal values are larger! Need to normalize and only allow :
         # value_speed = sqrt(transformed_signal_1**2 + transformed_signal_2 ** 2)
-        # transformed_signal_1 = transformed_signal_1 * self.max_speed / value_speed
-        # transformed_signal_2 = transformed_signal_2 * self.max_speed / value_speed
+        transformed_signal_1 = transformed_signal_1 * self.max_speed
+        transformed_signal_2 = transformed_signal_2 * self.max_speed
 
         dq = calculate_dq_j_inv(self.q1, self.q2, transformed_signal_1, transformed_signal_2)
 
@@ -126,6 +126,9 @@ class StateFunctions:
         q1_error = dq[0][0] / self.frequency # (reference angle - current angle)*delta t
         q2_error = dq[1][0] / self.frequency
         
+        self.pc.set(2, q1_error)
+        self.pc.set(3, q2_error)
+        self.pc.send()
 
         voltage_1 = self.dq1_controller.transfer(q1_error)
         voltage_2 = self.dq2_controller.transfer(q2_error)
